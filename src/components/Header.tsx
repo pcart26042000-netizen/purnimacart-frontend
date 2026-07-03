@@ -48,6 +48,11 @@ export default function Header({
     if (page === 'category') {
       setSelectedCategory('all');
     }
+    if (page === 'admin') {
+      window.history.pushState({}, '', '/admin/dashboard');
+    } else if (page === 'home') {
+      window.history.pushState({}, '', '/');
+    }
   };
 
   const handleProductSelect = (id: string) => {

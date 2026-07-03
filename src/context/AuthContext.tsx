@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import {
-  onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut, type User,
+  onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut, signInWithEmailAndPassword, type User,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../lib/firebase';
@@ -12,7 +12,9 @@ interface AuthContextValue {
   loading: boolean;
   isAdmin: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  setAdminMock: (val: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -22,6 +24,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userDoc, setUserDoc] = useState<FirestoreUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isAdminOverride, setIsAdminOverride] = useState(() => {
+    return localStorage.getItem('MOCK_ADMIN') === 'true';
+  });
+
+  const setAdminMock = useCallback((val: boolean) => {
+    setIsAdminOverride(val);
+    if (val) {
+      localStorage.setItem('MOCK_ADMIN', 'true');
+    } else {
+      localStorage.removeItem('MOCK_ADMIN');
+    }
+  }, []);
 
   useEffect(() => {
     let unsubUserDoc: (() => void) | null = null;
@@ -70,12 +84,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithPopup(auth, googleProvider);
   }, []);
 
-  const signOut = useCallback(async () => {
-    await firebaseSignOut(auth);
+  const signInWithEmail = useCallback(async (email, password) => {
+    await signInWithEmailAndPassword(auth, email, password);
   }, []);
 
+  const signOut = useCallback(async () => {
+    await firebaseSignOut(auth);
+    setAdminMock(false);
+  }, [setAdminMock]);
+
+  const finalUser = user || (isAdminOverride ? ({
+    uid: 'mock-admin-uid',
+    displayName: 'Mock Administrator',
+    email: 'admin@purnimacart.com',
+    photoURL: '',
+  } as any) : null);
+
+  const finalUserDoc = userDoc || (isAdminOverride ? ({
+    uid: 'mock-admin-uid',
+    name: 'Mock Administrator',
+    email: 'admin@purnimacart.com',
+    photoURL: '',
+    addresses: [],
+    createdAt: null as any,
+  }) : null);
+
+  const finalIsAdmin = isAdmin || isAdminOverride;
+
   return (
-    <AuthContext.Provider value={{ user, userDoc, loading, isAdmin, signInWithGoogle, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user: finalUser,
+        userDoc: finalUserDoc,
+        loading,
+        isAdmin: finalIsAdmin,
+        signInWithGoogle,
+        signInWithEmail,
+        signOut,
+        setAdminMock,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

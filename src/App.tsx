@@ -77,15 +77,11 @@ function SignInGate({ onSignIn, onBack }: { onSignIn: () => void; onBack: () => 
 
 function AdminLoginForm({
   onSignInEmail,
-  onSignInGoogle,
   onBack,
-  setAdminMock,
   triggerToast
 }: {
   onSignInEmail: (email: string, pass: string) => Promise<void>;
-  onSignInGoogle: () => Promise<void>;
   onBack: () => void;
-  setAdminMock: (val: boolean) => void;
   triggerToast: (msg: string, type?: 'success' | 'info') => void;
 }) {
   const [email, setEmail] = useState('');
@@ -98,15 +94,6 @@ function AdminLoginForm({
 
     setLoading(true);
     try {
-      // Local development bypass check
-      if (email.trim().toLowerCase() === 'admin@purnimacart.com' && password === 'admin123') {
-        setAdminMock(true);
-        window.history.pushState({}, '', '/admin/dashboard');
-        triggerToast('Logged in as Mock Admin (Bypass Mode)');
-        setLoading(false);
-        return;
-      }
-
       await onSignInEmail(email.trim(), password);
       window.history.pushState({}, '', '/admin/dashboard');
       triggerToast('Logged in successfully!');
@@ -160,28 +147,9 @@ function AdminLoginForm({
           </button>
         </form>
 
-        <div className="relative flex py-2 items-center">
-          <div className="flex-grow border-t border-[#e8bcb7]/20"></div>
-          <span className="flex-shrink mx-4 text-[10px] text-[#5e3f3b]/50 uppercase tracking-wider font-bold">Or</span>
-          <div className="flex-grow border-t border-[#e8bcb7]/20"></div>
-        </div>
-
-        <button
-          onClick={onSignInGoogle}
-          className="w-full flex items-center justify-center gap-3 bg-[#fff0ee] hover:bg-[#ffe4df] text-[#291715] py-3.5 rounded-xl font-bold text-xs transition-colors cursor-pointer border border-[#e8bcb7]/15"
-        >
-          <svg className="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24">
-            <path
-              fill="#EA4335"
-              d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.484 0-6.19-2.77-6.19-6.19 0-3.42 2.706-6.19 6.19-6.19 1.571 0 2.946.549 4.025 1.571l3.025-3.025C19.123 2.115 15.932 1 12.24 1A10.74 10.74 0 0 0 1.5 11.74a10.74 10.74 0 0 0 10.74 10.74c5.845 0 10.232-4.114 10.232-10.232 0-.675-.084-1.35-.197-1.963H12.24Z"
-            />
-          </svg>
-          Sign in with Google
-        </button>
-
         <button
           onClick={onBack}
-          className="w-full text-center text-xs font-semibold text-[#5e3f3b]/60 hover:text-primary transition-colors cursor-pointer"
+          className="w-full text-center text-xs font-semibold text-[#5e3f3b]/60 hover:text-primary transition-colors cursor-pointer pt-2"
         >
           Cancel and return to store
         </button>
@@ -442,12 +410,10 @@ export default function App() {
       return (
         <AdminLoginForm
           onSignInEmail={signInWithEmail}
-          onSignInGoogle={signInWithGoogle}
           onBack={() => {
             window.history.pushState({}, '', '/');
             setCurrentPage('home');
           }}
-          setAdminMock={setAdminMock}
           triggerToast={triggerToast}
         />
       );

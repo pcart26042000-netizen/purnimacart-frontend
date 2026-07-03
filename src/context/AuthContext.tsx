@@ -63,10 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         unsubUserDoc = onSnapshot(userRef, (userSnap) => {
           if (userSnap.exists()) setUserDoc(userSnap.data() as FirestoreUser);
         });
-        // Admin check: presence of a doc in `admins/{uid}` grants admin panel access.
-        // See firestore.rules — this same check is enforced server-side, this is UI-only gating.
-        const adminSnap = await getDoc(doc(db, 'admins', firebaseUser.uid));
-        setIsAdmin(adminSnap.exists());
+        // Admin check: email is admin@purnimacart.com
+        setIsAdmin(firebaseUser.email === 'admin@purnimacart.com');
       } else {
         setUserDoc(null);
         setIsAdmin(false);

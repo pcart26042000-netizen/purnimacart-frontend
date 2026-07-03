@@ -44,9 +44,15 @@ export async function getOrderById(orderId: string): Promise<FirestoreOrder | nu
 
 export async function getUserOrders(uid: string): Promise<FirestoreOrder[]> {
   try {
-    const q = query(collection(db, COL), where('userId', '==', uid), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, COL), where('userId', '==', uid));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() } as FirestoreOrder));
+    const items = snap.docs.map((d) => ({ id: d.id, ...d.data() } as FirestoreOrder));
+    items.sort((a, b) => {
+      const t1 = a.createdAt ? (typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : (a.createdAt.seconds * 1000)) : 0;
+      const t2 = b.createdAt ? (typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : (b.createdAt.seconds * 1000)) : 0;
+      return t2 - t1;
+    });
+    return items;
   } catch (error: any) {
     console.error(error);
     throw error;

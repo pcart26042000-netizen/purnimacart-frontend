@@ -19,9 +19,10 @@ export function isBannerLive(banner: FirestoreBanner, now: Date = new Date()): b
 }
 
 export async function getActiveBanners(): Promise<FirestoreBanner[]> {
-  const q = query(collection(db, BANNERS_COL), where('isActive', '==', true), orderBy('order', 'asc'));
+  const q = query(collection(db, BANNERS_COL), where('isActive', '==', true));
   const snap = await getDocs(q);
   const banners = snap.docs.map(d => ({ id: d.id, ...d.data() } as FirestoreBanner));
+  banners.sort((a, b) => (a.order || 0) - (b.order || 0));
   // Scheduling window is enforced client-side on top of the isActive filter
   // above, since Firestore can't easily query "now is between two fields".
   return banners.filter((b) => isBannerLive(b));

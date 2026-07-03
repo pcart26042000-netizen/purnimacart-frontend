@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { FirestoreProduct } from '../types/firestore';
 import { productFromFirestore } from '../lib/adapters';
@@ -21,8 +21,7 @@ export function useActiveProducts(): UseProductsResult {
   useEffect(() => {
     const q = query(
       collection(db, 'products'),
-      where('isActive', '==', true),
-      orderBy('createdAt', 'desc')
+      where('isActive', '==', true)
     );
 
     const unsub = onSnapshot(
@@ -31,6 +30,12 @@ export function useActiveProducts(): UseProductsResult {
         const items = snap.docs.map(
           (d) => ({ id: d.id, ...d.data() } as FirestoreProduct)
         );
+        // Sort client-side by createdAt desc
+        items.sort((a, b) => {
+          const t1 = a.createdAt ? (typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : (a.createdAt.seconds * 1000)) : 0;
+          const t2 = b.createdAt ? (typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : (b.createdAt.seconds * 1000)) : 0;
+          return t2 - t1;
+        });
         setProducts(items.map(productFromFirestore));
         setLoading(false);
         setError(null);

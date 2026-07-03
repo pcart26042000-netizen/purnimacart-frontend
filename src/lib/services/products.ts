@@ -8,9 +8,15 @@ import type { FirestoreProduct } from '../../types/firestore';
 const COL = 'products';
 
 export async function getActiveProducts(): Promise<FirestoreProduct[]> {
-  const q = query(collection(db, COL), where('isActive', '==', true), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, COL), where('isActive', '==', true));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() } as FirestoreProduct));
+  const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as FirestoreProduct));
+  items.sort((a, b) => {
+    const t1 = a.createdAt ? (typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : (a.createdAt.seconds * 1000)) : 0;
+    const t2 = b.createdAt ? (typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : (b.createdAt.seconds * 1000)) : 0;
+    return t2 - t1;
+  });
+  return items;
 }
 
 export async function getProductsByCategory(categorySlug: string): Promise<FirestoreProduct[]> {

@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Timer,
-  ChevronLeft,
-  ChevronRight,
   Sparkles,
   AlertCircle,
   Home as HomeIcon,
@@ -26,8 +23,6 @@ import { useStoreSettings } from './hooks/useStoreSettings';
 
 import Header from './components/Header';
 import ProductCard from './components/ProductCard';
-import CategoryList from './components/CategoryList';
-import BentoCollections from './components/BentoCollections';
 import ProductDetail from './components/ProductDetail';
 import CartSidebar from './components/CartSidebar';
 import Footer from './components/Footer';
@@ -36,6 +31,7 @@ import OrderSuccessPage from './components/OrderSuccessPage';
 import OrderHistoryPage from './components/OrderHistoryPage';
 import OrderDetailsPage from './components/OrderDetailsPage';
 import AddressBook from './components/AddressBook';
+import { PrivacyPolicyPage, TermsConditionsPage, RefundReturnPolicyPage, ShippingPolicyPage, CancellationPolicyPage, ContactPage } from './components/PolicyPages';
 
 import AdminLayout from './admin/AdminLayout';
 import AdminDashboard from './admin/AdminDashboard';
@@ -46,6 +42,11 @@ import AdminCustomers from './admin/AdminCustomers';
 import AdminCoupons from './admin/AdminCoupons';
 import AdminBanners from './admin/AdminBanners';
 import AdminSettings from './admin/AdminSettings';
+
+const DEFAULT_FIVE_MIN_PINCODE = '732101';
+function normalizePincode(value: string) {
+  return value.replace(/\D/g, '').slice(0, 6);
+}
 
 // Shared gate shown in place of any page that requires authentication
 // (Wishlist, Checkout, My Orders, Addresses) when the visitor is a guest.
@@ -106,8 +107,8 @@ function AdminLoginForm({
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#fff8f7] px-6 py-12">
-      <div className="max-w-md w-full bg-white rounded-3xl border border-[#e8bcb7]/30 p-8 shadow-xl space-y-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--brand-soft-surface)] px-6 py-12">
+      <div className="max-w-md w-full bg-white rounded-3xl border border-[var(--brand-soft-border)] p-8 shadow-xl space-y-6">
         <div className="text-center space-y-2">
           <h1 className="font-display font-black text-3xl text-primary tracking-tight">PCart Admin</h1>
           <p className="text-xs text-[#5e3f3b]/70">Enter your administrator credentials to access the panel.</p>
@@ -122,7 +123,7 @@ function AdminLoginForm({
               placeholder="admin@purnimacart.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#fff8f7] border border-[#e8bcb7]/25 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 text-[#291715]"
+              className="w-full bg-[var(--brand-soft-surface)] border border-[#e8bcb7]/25 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 text-[#291715]"
             />
           </div>
 
@@ -131,10 +132,10 @@ function AdminLoginForm({
             <input
               type="password"
               required
-              placeholder="••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#fff8f7] border border-[#e8bcb7]/25 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 text-[#291715]"
+              className="w-full bg-[var(--brand-soft-surface)] border border-[#e8bcb7]/25 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 text-[#291715]"
             />
           </div>
 
@@ -173,52 +174,57 @@ export default function App() {
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  // Business Logic State — Firestore is the source of truth (guest cart uses
+  // Business Logic State â€” Firestore is the source of truth (guest cart uses
   // a small localStorage staging area internally, merged in on login).
   const { cartItems, add: addToCartFs, updateQuantity: updateCartQuantityFs, removeItem: removeCartItemFs, clear: clearCartFs } = useCart(PRODUCTS);
   const { wishlist, isWishlisted, toggle: toggleWishlistFs } = useWishlist(PRODUCTS);
   const { settings: storeSettings } = useStoreSettings();
   const [cartOpen, setCartOpen] = useState(false);
-  const [activeTrendingTab, setActiveTrendingTab] = useState<'popular' | 'top-sellers'>('popular');
   const [activeCoupons, setActiveCoupons] = useState<FirestoreCoupon[]>([]);
+  const [fiveMinPincode, setFiveMinPincode] = useState<string>(() => localStorage.getItem('pcart_five_min_pincode') || '');
+  const [showFiveMinModal, setShowFiveMinModal] = useState<boolean>(false);
+  const serviceableFiveMinPincode = normalizePincode(storeSettings.fiveMinDeliveryPincode || DEFAULT_FIVE_MIN_PINCODE);
+  const isFiveMinActive = !!storeSettings.fiveMinDeliveryAvailable && fiveMinPincode === serviceableFiveMinPincode;
 
   useEffect(() => {
-    getActiveCoupons()
-      .then(setActiveCoupons)
-      .catch((err) => console.error(err));
-  }, []);
+    if (typeof document === 'undefined') return;
 
+    const root = document.documentElement;
+    if (isFiveMinActive) {
+      root.dataset.appTheme = 'five-min';
+    } else {
+      delete root.dataset.appTheme;
+    }
+
+    return () => {
+      if (root.dataset.appTheme === 'five-min') {
+        delete root.dataset.appTheme;
+      }
+    };
+  }, [isFiveMinActive]);
+
+  const handleFiveMinActivate = (pincode: string) => {
+    setFiveMinPincode(pincode);
+    localStorage.setItem('pcart_five_min_pincode', pincode);
+  };
+
+  const handleFiveMinDeactivate = () => {
+    setFiveMinPincode('');
+    localStorage.removeItem('pcart_five_min_pincode');
+  };
+
+  const handleFiveMinClick = () => {
+    if (!storeSettings.fiveMinDeliveryAvailable) {
+      triggerToast('5-Minute Delivery is currently unavailable. Please check back later!', 'info');
+      return;
+    }
+    setShowFiveMinModal(true);
+  };
   // Interactive UI State
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
-  const [dealTime, setDealTime] = useState({ hours: 4, minutes: 22, seconds: 51 });
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [showToast, setShowToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
   const [categorySort, setCategorySort] = useState<'default' | 'price-low' | 'price-high' | 'rating'>('default');
-
-  // Today's Deals countdown logic
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setDealTime((prev) => {
-        let s = prev.seconds - 1;
-        let m = prev.minutes;
-        let h = prev.hours;
-
-        if (s < 0) {
-          s = 59;
-          m -= 1;
-          if (m < 0) {
-            m = 59;
-            h -= 1;
-            if (h < 0) {
-              h = 23; // reset loop
-            }
-          }
-        }
-        return { hours: h, minutes: m, seconds: s };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Hero carousel auto play
   const totalSlides = firestoreBanners.length > 0 ? firestoreBanners.length : 3;
@@ -271,7 +277,7 @@ export default function App() {
     return true;
   };
 
-  // Cart operations — Firestore-backed for signed-in users, localStorage
+  // Cart operations â€” Firestore-backed for signed-in users, localStorage
   // staging for guests (merged into Firestore automatically on login).
   const handleAddToCart = async (product: Product, quantity = 1, color = 'Classic', size = 'Standard') => {
     try {
@@ -302,7 +308,7 @@ export default function App() {
     }
   };
 
-  // Wishlist operations — requires sign-in per spec.
+  // Wishlist operations â€” requires sign-in per spec.
   const handleToggleWishlist = async (product: Product) => {
     if (!user) {
       triggerToast('Please sign in to use your wishlist.', 'info');
@@ -346,13 +352,11 @@ export default function App() {
   const currentSelectedProduct = selectedProductId
     ? PRODUCTS.find((p) => p.id === selectedProductId)
     : null;
+  const relatedProducts = currentSelectedProduct
+    ? PRODUCTS.filter((p) => p.category === currentSelectedProduct.category && p.id !== currentSelectedProduct.id)
+    : [];
 
-  const dealsProducts = PRODUCTS.filter((p) => p.isDeal);
-
-  // Trending Filter list
-  const trendingProducts = activeTrendingTab === 'popular'
-    ? PRODUCTS.filter((p) => p.rating >= 4.8)
-    : PRODUCTS.filter((p) => p.reviewCount >= 100);
+  const trendingProducts = PRODUCTS;
 
   // Category browse products
   const categoryFilteredProducts = selectedCategory === 'all'
@@ -395,13 +399,13 @@ export default function App() {
   ];
 
   if (currentPage === 'admin') {
-    // Admin access is never hardcoded — it's driven by the `admins/{uid}`
+    // Admin access is never hardcoded â€” it's driven by the `admins/{uid}`
     // Firestore doc via AuthContext. Anyone who isn't signed in or isn't
     // an admin gets a gate screen instead of the panel itself.
     if (authLoading) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#fff8f7]">
-          <p className="text-sm text-[#5e3f3b]/60 font-semibold">Checking access…</p>
+        <div className="min-h-screen flex items-center justify-center bg-[var(--brand-soft-surface)]">
+          <p className="text-sm text-[#5e3f3b]/60 font-semibold">Checking accessâ€¦</p>
         </div>
       );
     }
@@ -442,10 +446,10 @@ export default function App() {
   }
 
   return (
-    <div className="bg-[#fff8f7] text-[#291715] font-sans min-h-screen selection:bg-primary/20 selection:text-primary pb-16 md:pb-0">
+    <div className="bg-[var(--brand-soft-surface)] text-[#291715] font-sans min-h-screen selection:bg-primary/20 selection:text-primary pb-16 md:pb-0">
       {/* Dynamic Toast Feedback Notification */}
       {showToast && (
-        <div className="fixed bottom-20 md:bottom-8 right-6 z-[1000] bg-white rounded-2xl shadow-2xl border border-[#e8bcb7]/30 p-4 max-w-sm flex items-center gap-3 animate-bounce">
+        <div className="fixed bottom-20 md:bottom-8 right-6 z-[1000] bg-white rounded-2xl shadow-2xl border border-[var(--brand-soft-border)] p-4 max-w-sm flex items-center gap-3 animate-bounce">
           <div className="bg-primary/10 text-primary p-2 rounded-xl">
             <Sparkles size={18} />
           </div>
@@ -466,6 +470,9 @@ export default function App() {
         openCart={() => setCartOpen(true)}
         products={PRODUCTS}
         categories={categories}
+        selectedCategory={selectedCategory}
+        isFiveMinActive={isFiveMinActive}
+        onFiveMinClick={handleFiveMinClick}
       />
 
       {/* Cart Drawer Component */}
@@ -498,7 +505,7 @@ export default function App() {
         {(productsLoading || categoriesLoading) && currentPage !== 'product-detail' ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
             <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="text-xs font-semibold text-[#5e3f3b]/60">Loading the boutique for you…</p>
+            <p className="text-xs font-semibold text-[#5e3f3b]/60">Loading the boutique for youâ€¦</p>
           </div>
         ) : (
         <>
@@ -573,66 +580,17 @@ export default function App() {
               )}
             </section>
 
-            {/* Shop by Category Segment */}
-            <section className="space-y-8">
-              <div className="flex items-center justify-between">
+            {/* Trending now section */}
+            <section className="space-y-10">
+              <div className="flex items-center justify-between gap-4">
                 <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
-                  Shop by Category
+                  Trending Now
                 </h2>
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setCurrentPage('category');
-                  }}
-                  className="text-primary font-bold text-xs flex items-center gap-1.5 hover:underline cursor-pointer"
-                >
-                  View All
-                  <ArrowRight size={12} />
-                </button>
               </div>
 
-              {/* Reactive category chips list */}
-              <CategoryList
-                categories={categories}
-                selectedCategory={selectedCategory}
-                onSelectCategory={(catId) => {
-                  setSelectedCategory(catId);
-                  setCurrentPage('category');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            </section>
-
-            {/* Today's Deals section */}
-            <section className="py-12 px-6 md:px-10 bg-[#fff0ee] rounded-[32px] border border-[#e8bcb7]/25 relative">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                <div className="flex flex-wrap items-center gap-6">
-                  <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
-                    Today's Deals
-                  </h2>
-                  <div className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl shadow shadow-primary/10">
-                    <Timer size={16} />
-                    <div className="flex gap-1 font-mono font-bold text-sm">
-                      <span>{String(dealTime.hours).padStart(2, '0')}</span>:
-                      <span>{String(dealTime.minutes).padStart(2, '0')}</span>:
-                      <span>{String(dealTime.seconds).padStart(2, '0')}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button className="w-10 h-10 rounded-full border border-[#e8bcb7]/30 bg-white flex items-center justify-center text-[#5e3f3b] hover:bg-primary hover:text-white transition-colors cursor-pointer shadow-sm">
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button className="w-10 h-10 rounded-full border border-[#e8bcb7]/30 bg-white flex items-center justify-center text-[#5e3f3b] hover:bg-primary hover:text-white transition-colors cursor-pointer shadow-sm">
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Deals product grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {dealsProducts.map((product) => (
+              {/* Trending products list */}
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                {trendingProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -649,118 +607,11 @@ export default function App() {
                       e.stopPropagation();
                       handleToggleWishlist(p);
                     }}
+                    isFiveMinActive={isFiveMinActive}
                   />
                 ))}
               </div>
             </section>
-
-            {/* Featured Bento Grid collections */}
-            <section className="space-y-10">
-              <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
-                Featured Collections
-              </h2>
-              <BentoCollections
-                onSelectCategory={setSelectedCategory}
-                onSelectProduct={setSelectedProductId}
-                setCurrentPage={setCurrentPage}
-              />
-            </section>
-
-            {/* Promotional Banner coupon */}
-            <section>
-              <div className="w-full bg-primary rounded-[32px] py-12 px-6 md:px-16 flex flex-col md:flex-row items-center justify-between text-white relative overflow-hidden shadow-xl shadow-primary/10">
-                <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                
-                <div className="relative z-10 text-center md:text-left mb-8 md:mb-0 space-y-3">
-                  <h2 className="font-display font-bold text-3xl md:text-4xl">
-                    Unlock 20% Extra
-                  </h2>
-                  <p className="font-sans text-xs md:text-sm text-white/90">
-                    On your first purchase over ₹4,999. Use Code:{' '}
-                    <span 
-                      onClick={() => handleCopyCoupon('PCART20')}
-                      className="font-bold border-2 border-dashed border-white/50 px-2.5 py-1 rounded-lg ml-1.5 bg-white/10 select-all cursor-pointer hover:bg-white/20 transition-all text-white font-mono"
-                      title="Click to copy coupon code"
-                    >
-                      PCART20
-                    </span>
-                  </p>
-                </div>
-                <button 
-                  onClick={() => handleCopyCoupon('PCART20')}
-                  className="relative z-10 bg-white text-primary px-8 py-3.5 rounded-xl font-bold text-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer shadow-lg"
-                >
-                  Claim Offer
-                </button>
-              </div>
-            </section>
-
-            {/* Trending now section */}
-            <section className="space-y-10">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
-                  Trending Now
-                </h2>
-                <div className="flex bg-[#fff0ee] p-1.5 rounded-full border border-[#e8bcb7]/25 w-fit">
-                  <button
-                    onClick={() => setActiveTrendingTab('popular')}
-                    className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                      activeTrendingTab === 'popular'
-                        ? 'bg-primary text-white shadow shadow-primary/20'
-                        : 'text-[#5e3f3b] hover:text-primary'
-                    }`}
-                  >
-                    Most Popular
-                  </button>
-                  <button
-                    onClick={() => setActiveTrendingTab('top-sellers')}
-                    className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                      activeTrendingTab === 'top-sellers'
-                        ? 'bg-primary text-white shadow shadow-primary/20'
-                        : 'text-[#5e3f3b] hover:text-primary'
-                    }`}
-                  >
-                    Top Sellers
-                  </button>
-                </div>
-              </div>
-
-              {/* Trending products list */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {trendingProducts.slice(0, 4).map((product) => (
-                  <div key={product.id} className="group cursor-pointer" onClick={() => {
-                    setSelectedProductId(product.id);
-                    setCurrentPage('product-detail');
-                  }}>
-                    <div className="aspect-[4/5] bg-[#fff0ee] rounded-[32px] overflow-hidden relative mb-4 shadow-sm border border-[#e8bcb7]/15">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-bold text-[#291715] flex items-center gap-1.5 shadow-sm">
-                        <span className="text-amber-500">★</span>
-                        <span>{product.rating}</span>
-                        <span className="text-[#5e3f3b]/60 text-[10px]">({product.reviewCount})</span>
-                      </div>
-                    </div>
-                    <div className="px-2">
-                      <span className="text-[10px] font-bold text-[#5e3f3b]/60 uppercase tracking-wider block">
-                        {product.category}
-                      </span>
-                      <h4 className="font-display font-semibold text-sm text-[#291715] group-hover:text-primary mt-1 line-clamp-1 transition-colors">
-                        {product.name}
-                      </h4>
-                      <p className="text-primary font-bold text-sm mt-1.5">
-                        ₹{product.price.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
             {/* Email Inner circle newsletter signup */}
             <section className="py-16 px-6 bg-[#fedbd6] rounded-[40px] border border-[#e8bcb7]/25 text-center max-w-4xl mx-auto space-y-6 shadow-sm">
               <div className="max-w-2xl mx-auto space-y-3">
@@ -835,7 +686,7 @@ export default function App() {
 
             {/* List products grid */}
             {sortedCategoryProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {sortedCategoryProducts.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -853,6 +704,7 @@ export default function App() {
                       e.stopPropagation();
                       handleToggleWishlist(p);
                     }}
+                    isFiveMinActive={isFiveMinActive}
                   />
                 ))}
               </div>
@@ -868,6 +720,12 @@ export default function App() {
         {currentPage === 'product-detail' && currentSelectedProduct && (
           <ProductDetail
             product={currentSelectedProduct}
+            relatedProducts={relatedProducts}
+            onSelectRelatedProduct={(id) => {
+              setSelectedProductId(id);
+              setCurrentPage('product-detail');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             onBack={() => {
               setSelectedProductId(null);
               // Back to appropriate page
@@ -876,6 +734,7 @@ export default function App() {
             onAddToCart={(p, q, c, s) => handleAddToCart(p, q, c, s)}
             isWishlisted={isWishlisted(currentSelectedProduct.id)}
             onToggleWishlist={handleToggleWishlist}
+            isFiveMinActive={isFiveMinActive}
           />
         )}
 
@@ -891,7 +750,7 @@ export default function App() {
             </div>
 
             {wishlist.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {wishlist.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -909,6 +768,7 @@ export default function App() {
                       e.stopPropagation();
                       handleToggleWishlist(p);
                     }}
+                    isFiveMinActive={isFiveMinActive}
                   />
                 ))}
               </div>
@@ -973,7 +833,7 @@ export default function App() {
               </div>
             ) : (
               <div className="text-center py-16 bg-white rounded-[32px] border border-[#e8bcb7]/15">
-                <p className="text-sm font-semibold text-[#5e3f3b]/70">No active coupons right now — check back soon!</p>
+                <p className="text-sm font-semibold text-[#5e3f3b]/70">No active coupons right now â€” check back soon!</p>
               </div>
             )}
 
@@ -1063,6 +923,12 @@ export default function App() {
             <AddressBook uid={user.uid} addresses={userDoc?.addresses || []} onToast={triggerToast} />
           </div>
         )}
+        {currentPage === 'privacy-policy' && <PrivacyPolicyPage />}
+        {currentPage === 'terms-conditions' && <TermsConditionsPage />}
+        {currentPage === 'refund-return-policy' && <RefundReturnPolicyPage />}
+        {currentPage === 'shipping-policy' && <ShippingPolicyPage />}
+        {currentPage === 'cancellation-policy' && <CancellationPolicyPage />}
+        {currentPage === 'contact' && <ContactPage />}
         </>
         )}
       </main>
@@ -1074,7 +940,7 @@ export default function App() {
       />
 
       {/* Bottom Sticky Mobile Nav Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-[#fff8f7]/95 backdrop-blur-md border-t border-[#e8bcb7]/20 shadow-xl h-16">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-[var(--brand-soft-surface)] backdrop-blur-md border-t border-[#e8bcb7]/20 shadow-xl h-16">
         <button
           onClick={() => {
             setCurrentPage('home');
@@ -1126,6 +992,185 @@ export default function App() {
           <span className="text-[10px] font-bold mt-0.5">Wishlist</span>
         </button>
       </nav>
+
+      {/* 5 Min Delivery Modal */}
+      <FiveMinDeliveryModal
+        isOpen={showFiveMinModal}
+        onClose={() => setShowFiveMinModal(false)}
+        isFiveMinActive={isFiveMinActive}
+        activePincode={fiveMinPincode}
+        serviceablePincode={storeSettings.fiveMinDeliveryPincode || DEFAULT_FIVE_MIN_PINCODE}
+        onActivate={handleFiveMinActivate}
+        onDeactivate={handleFiveMinDeactivate}
+        triggerToast={triggerToast}
+      />
     </div>
   );
 }
+function FiveMinDeliveryModal({
+  isOpen,
+  onClose,
+  isFiveMinActive,
+  activePincode,
+  serviceablePincode,
+  onActivate,
+  onDeactivate,
+  triggerToast,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  isFiveMinActive: boolean;
+  activePincode: string;
+  serviceablePincode: string;
+  onActivate: (pincode: string) => void;
+  onDeactivate: () => void;
+  triggerToast: (msg: string, type?: 'success' | 'info') => void;
+}) {
+  const [pincode, setPincode] = useState(activePincode);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setPincode(activePincode);
+      setErrorMsg('');
+    }
+  }, [isOpen, activePincode]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const entered = normalizePincode(pincode);
+    const servicePin = normalizePincode(serviceablePincode || DEFAULT_FIVE_MIN_PINCODE);
+
+    if (!entered) {
+      setErrorMsg('Please enter a valid 6-digit pincode.');
+      return;
+    }
+
+    if (entered === servicePin) {
+      onActivate(entered);
+      triggerToast(`Success! 5-Minute Delivery is active for pincode ${servicePin}.`);
+      onClose();
+      return;
+    }
+
+    setErrorMsg('We are coming soon to your area');
+  };
+
+  const handleDeactivate = () => {
+    onDeactivate();
+    triggerToast('5-Minute Delivery has been deactivated.', 'info');
+    onClose();
+  };
+
+  const servicePin = normalizePincode(serviceablePincode || DEFAULT_FIVE_MIN_PINCODE);
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1100] flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl border border-[var(--brand-soft-border)] p-6 md:p-8 max-w-sm w-full shadow-2xl relative animate-scale-up text-center">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-sm font-semibold select-none cursor-pointer"
+        >
+          âœ•
+        </button>
+
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+            <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 18H14M4 24H12M8 30H16" stroke="#fb641b" strokeWidth="3" strokeLinecap="round" />
+              <path d="M19 32C19 25.3726 24.3726 20 31 20H33.5L37 13H42" stroke="var(--brand-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M38 20L40 32H35" stroke="var(--brand-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="21" cy="35" r="4" fill="none" stroke="#291715" strokeWidth="3" />
+              <circle cx="37" cy="35" r="4" fill="none" stroke="#291715" strokeWidth="3" />
+              <circle cx="26" cy="14" r="6" fill="var(--brand-primary)" stroke="white" strokeWidth="1.5" />
+              <path d="M26 11V14H29" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+
+        {isFiveMinActive ? (
+          <div className="space-y-4">
+            <h3 className="font-display font-bold text-lg text-[#291715]">5-Min Delivery Active!</h3>
+            <p className="text-xs text-[#5e3f3b]/70 leading-relaxed">
+              Superfast delivery is active for pincode <strong className="text-green-600">{servicePin}</strong>. Eligible products show the <strong className="text-green-600">5 Min</strong> badge.
+            </p>
+            <div className="rounded-2xl border border-green-200 bg-green-50/60 px-4 py-3 text-left text-xs text-green-800">
+              Active pincode: <strong>{activePincode}</strong>
+            </div>
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={handleDeactivate}
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm shadow-red-500/10"
+              >
+                Deactivate Fast Delivery
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onDeactivate();
+                  setPincode('');
+                  setErrorMsg('');
+                }}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+              >
+                Check Another Pincode
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4 text-center">
+            <h3 className="font-display font-bold text-lg text-[#291715]">5-Min Fast Delivery</h3>
+            <p className="text-xs text-[#5e3f3b]/70 leading-relaxed">
+              Enter your pincode to check if superfast 5-minute delivery is available in your area.
+            </p>
+
+            <div className="space-y-1.5">
+              <input
+                type="text"
+                maxLength={6}
+                required
+                inputMode="numeric"
+                pattern="\d*"
+                placeholder="Enter Pincode"
+                value={pincode}
+                onChange={(e) => {
+                  setPincode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                  setErrorMsg('');
+                }}
+                className="w-full bg-[var(--brand-soft-surface)] border border-[var(--brand-soft-border)] rounded-2xl px-4 py-3 text-center text-lg font-bold tracking-widest outline-none focus:ring-2 focus:ring-primary/20 text-[#291715] placeholder:tracking-normal placeholder:text-xs placeholder:text-gray-400"
+              />
+              {errorMsg && (
+                <p className="text-xs text-red-500 font-semibold animate-pulse">{errorMsg}</p>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-red-500/10"
+              >
+                Submit
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+

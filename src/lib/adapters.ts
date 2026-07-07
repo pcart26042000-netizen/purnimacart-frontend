@@ -1,4 +1,4 @@
-// Adapters that convert Firestore documents into the existing UI-facing
+﻿// Adapters that convert Firestore documents into the existing UI-facing
 // types (src/types.ts) so none of the presentational components need to
 // know about the Firestore data model. Keeps Phase 2 wiring isolated from
 // the untouched UI layer.
@@ -24,6 +24,7 @@ export function productFromFirestore(fp: FirestoreProduct): Product {
     price: displayPrice,
     originalPrice,
     image: fp.images?.[0] || FALLBACK_IMAGE,
+    images: fp.images?.length ? fp.images : [fp.images?.[0] || FALLBACK_IMAGE],
     rating: fp.rating ?? 0,
     reviewCount: fp.reviewCount ?? 0,
     tags: fp.tags ?? [],
@@ -33,6 +34,8 @@ export function productFromFirestore(fp: FirestoreProduct): Product {
     // Firestore products don't carry a bullet-feature list yet; leave empty
     // rather than inventing copy. ProductDetail already treats this as optional.
     features: [],
+    returnWindow: fp.returnWindow,
+    isFiveMinBadge: !!fp.isFiveMinBadge,
   };
 }
 
@@ -52,8 +55,11 @@ export function categoryFromFirestore(fc: FirestoreCategory, productCount: numbe
     id: fc.slug,
     name: fc.name,
     // Unknown/new categories fall back to a generic grid icon instead of
-    // breaking — categories are meant to be unlimited and admin-defined.
+    // breaking â€” categories are meant to be unlimited and admin-defined.
     iconName: CATEGORY_ICONS[fc.slug] ?? 'grid',
     count: productCount,
+    image: fc.image,
   };
 }
+
+

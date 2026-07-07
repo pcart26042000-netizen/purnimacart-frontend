@@ -39,7 +39,8 @@ export const createRazorpayOrder = onCall(
 
     const { items, subtotal } = await priceCartServerSide(data.items);
     const address = await loadAddress(uid, data.addressId);
-    const deliveryCharge = await getStoreDeliveryCharge(subtotal);
+    const totalQty = data.items.reduce((acc, item) => acc + item.qty, 0);
+    const deliveryCharge = await getStoreDeliveryCharge(subtotal, totalQty);
 
     let discount = 0;
     let couponRefPath: string | undefined;
@@ -199,7 +200,8 @@ export const placeOrder = onCall(async (request) => {
 
   const { items, subtotal } = await priceCartServerSide(data.items);
   const address = await loadAddress(uid, data.addressId);
-  const deliveryCharge = await getStoreDeliveryCharge(subtotal);
+  const totalQty = data.items.reduce((acc, item) => acc + item.qty, 0);
+  const deliveryCharge = await getStoreDeliveryCharge(subtotal, totalQty);
 
   let discount = 0;
   let couponRef: FirebaseFirestore.DocumentReference | undefined;

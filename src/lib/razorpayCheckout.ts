@@ -1,4 +1,4 @@
-import { brandTheme } from './theme';
+﻿import { getBrandTheme } from './theme';
 
 const SCRIPT_SRC = 'https://checkout.razorpay.com/v1/checkout.js';
 
@@ -52,7 +52,7 @@ export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Pr
       email: options.prefillEmail,
       contact: options.prefillContact,
     },
-    theme: { color: brandTheme.primary },
+    theme: { color: getBrandTheme().primary },
     handler: (response: any) => options.onSuccess(response),
     modal: {
       ondismiss: () => options.onDismiss(),

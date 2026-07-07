@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Save, Store, Truck, Percent, Share2 } from 'lucide-react';
+import { Save, Store, Truck, Percent, Share2, MapPin } from 'lucide-react';
 import type { StoreSettings } from '../types/firestore';
 import { useAdminSettings } from './hooks/useAdminSettings';
 import { LoadingBlock, ErrorBlock } from './components/LoadingState';
+import Toggle from './components/Toggle';
 
 interface AdminSettingsProps {
   onToast: (message: string, type?: 'success' | 'info') => void;
@@ -98,6 +99,27 @@ export default function AdminSettings({ onToast }: AdminSettingsProps) {
               className={inputClass}
             />
           </Field>
+          <div className="sm:col-span-2 flex flex-col gap-4 rounded-xl border border-[#e8bcb7]/15 bg-[#fff8f7] p-4">
+            <Toggle
+              checked={!!form.fiveMinDeliveryAvailable}
+              onChange={(value) => set('fiveMinDeliveryAvailable', value)}
+              label="Enable 5-Minute Delivery"
+            />
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wide text-[#5e3f3b]/50 mb-1.5 block flex items-center gap-1.5">
+                <MapPin size={12} /> Serviceable Pincode
+              </label>
+              <input
+                value={form.fiveMinDeliveryPincode || ''}
+                onChange={(e) => set('fiveMinDeliveryPincode', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="732101"
+                className={inputClass}
+              />
+              <p className="mt-1.5 text-[10px] text-[#5e3f3b]/50">This is the pin users must enter to activate the 5-minute delivery badge.</p>
+            </div>
+          </div>
         </div>
       </Section>
 
@@ -141,3 +163,4 @@ export default function AdminSettings({ onToast }: AdminSettingsProps) {
     </form>
   );
 }
+

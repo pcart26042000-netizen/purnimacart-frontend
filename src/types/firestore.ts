@@ -45,6 +45,7 @@ export interface FirestoreProduct {
   tags: string[];
   isActive: boolean;
   isFeatured?: boolean;
+  isFiveMinBadge?: boolean;
   createdAt: Timestamp | null;
   updatedAt?: Timestamp | null;
 }
@@ -173,4 +174,14 @@ export interface StoreSettings {
   storeAddress: string;
   taxPercent: number; // applied on subtotal at checkout-preview level, GST-style
   socialLinks: SocialLinks;
+  promoTitle?: string;
+  promoSubtitle?: string;
+  promoCode?: string;
+  promoButtonText?: string;
+  showPromoBanner?: boolean;
+  fiveMinDeliveryAvailable?: boolean;
+  fiveMinDeliveryPincode?: string;
 }
+
+
+

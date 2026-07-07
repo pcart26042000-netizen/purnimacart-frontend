@@ -1,23 +1,60 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800;900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --brand-primary: #bb0012;
-  --brand-primary-hover: #9a000e;
-  --brand-background: #fff8f7;
-  --brand-on-background: #291715;
-  --brand-surface: #fff8f7;
-  --brand-surface-dim: #f5d2ce;
-  --brand-surface-bright: #fff8f7;
+  --brand-primary: #008cff;
+  --brand-primary-hover: #0072d6;
+  --brand-background: #f4f7fa;
+  --brand-on-background: #111827;
+  --brand-surface: #ffffff;
+  --brand-surface-dim: #f1f3f5;
+  --brand-surface-bright: #ffffff;
   --brand-surface-container-lowest: #ffffff;
-  --brand-surface-container-low: #fff0ee;
-  --brand-surface-container: #ffe9e6;
-  --brand-surface-container-high: #ffe2de;
-  --brand-surface-container-highest: #fedbd6;
-  --brand-on-surface: #291715;
-  --brand-on-surface-variant: #5e3f3b;
-  --brand-outline: #936e6a;
-  --brand-outline-variant: #e8bcb7;
+  --brand-surface-container-low: #fafafa;
+  --brand-surface-container: #f1f3f5;
+  --brand-surface-container-high: #e2e8f0;
+  --brand-surface-container-highest: #cbd5e1;
+  --brand-on-surface: #111827;
+  --brand-on-surface-variant: #4b5563;
+  --brand-outline: #f1f3f5;
+  --brand-outline-variant: #e2e8f0;
+  --brand-header-start: #1587ff;
+  --brand-header-mid: #379fff;
+  --brand-header-end: #f6fbff;
+  --brand-header-shadow: rgba(0, 102, 255, 0.18);
+  --brand-soft-surface: #fff8f7;
+  --brand-soft-surface-strong: #fff0ee;
+  --brand-soft-border: #e8bcb7;
+  --brand-soft-text: #5e3f3b;
+  --brand-soft-heading: #291715;
+}
+
+:root[data-app-theme='five-min'] {
+  --brand-primary: #e53935;
+  --brand-primary-hover: #c62828;
+  --brand-background: #fff5f5;
+  --brand-on-background: #2b1212;
+  --brand-surface: #ffffff;
+  --brand-surface-dim: #fff1f1;
+  --brand-surface-bright: #ffffff;
+  --brand-surface-container-lowest: #ffffff;
+  --brand-surface-container-low: #fff8f8;
+  --brand-surface-container: #ffe8e8;
+  --brand-surface-container-high: #ffd5d5;
+  --brand-surface-container-highest: #f6bcbc;
+  --brand-on-surface: #2b1212;
+  --brand-on-surface-variant: #7b4b4b;
+  --brand-outline: #f6d9d9;
+  --brand-outline-variant: #efc2c2;
+  --brand-header-start: #c62828;
+  --brand-header-mid: #ef5350;
+  --brand-header-end: #fff5f5;
+  --brand-header-shadow: rgba(198, 40, 40, 0.22);
+  --brand-soft-surface: #fff5f5;
+  --brand-soft-surface-strong: #ffe6e6;
+  --brand-soft-border: #efc2c2;
+  --brand-soft-text: #7b4b4b;
+  --brand-soft-heading: #2b1212;
 }
 
 @theme {
@@ -42,14 +79,30 @@
   --color-outline-variant: var(--brand-outline-variant);
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--brand-background);
+  color: var(--brand-on-background);
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* Custom styles for hidden scrollbar */
@@ -69,11 +122,25 @@
 }
 
 .product-card-shadow {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .product-card-shadow:hover {
-  box-shadow: 0 20px 40px rgba(187,0,18,0.06);
+  box-shadow: 0 12px 28px rgba(229,27,35,0.06);
   transform: translateY(-4px);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
 }

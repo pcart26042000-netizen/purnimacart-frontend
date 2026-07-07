@@ -225,7 +225,7 @@ export default function SearchOverlay({
                     onClick={() => handleCategoryPick(cat.id)}
                     className="flex flex-col items-center justify-center gap-2 bg-white border border-[#e8bcb7]/20 rounded-2xl py-4 px-2 hover:border-primary hover:shadow-md transition-all cursor-pointer"
                   >
-                    <span className="w-11 h-11 rounded-full bg-[#fff0ee] flex items-center justify-center text-primary font-display font-bold text-sm">
+                    <span className="w-11 h-11 rounded-full bg-[#fff0ee] flex items-center justify-center text-gray-900 font-display font-bold text-sm">
                       {cat.name.charAt(0)}
                     </span>
                     <span className="text-xs font-semibold text-[#291715] text-center leading-tight">
@@ -248,7 +248,7 @@ export default function SearchOverlay({
                     <button
                       key={cat.id}
                       onClick={() => handleCategoryPick(cat.id)}
-                      className="bg-[#fff0ee] text-primary rounded-full px-4 py-2 text-xs font-bold hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                      className="bg-[#fff0ee] text-gray-900 rounded-full px-4 py-2 text-xs font-bold hover:bg-primary hover:text-white transition-colors cursor-pointer"
                     >
                       {cat.name}
                     </button>
@@ -323,3 +323,4 @@ export default function SearchOverlay({
     </div>
   );
 }
+

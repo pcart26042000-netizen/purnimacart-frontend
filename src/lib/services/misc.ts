@@ -138,7 +138,7 @@ export async function deleteCoupon(id: string) {
 const SETTINGS_DOC = 'settings/store';
 
 const DEFAULT_STORE_SETTINGS: StoreSettings = {
-  deliveryCharge: 49,
+  deliveryCharge: 15,
   freeDeliveryThreshold: 999,
   storeName: 'PurnimaCart',
   storeEmail: '',
@@ -146,6 +146,8 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
   storeAddress: '',
   taxPercent: 0,
   socialLinks: {},
+  fiveMinDeliveryAvailable: false,
+  fiveMinDeliveryPincode: '732101',
 };
 
 export async function getStoreSettings(): Promise<StoreSettings> {
@@ -161,3 +163,6 @@ export async function getStoreSettings(): Promise<StoreSettings> {
 export async function updateStoreSettings(data: Partial<StoreSettings>) {
   await setDoc(doc(db, SETTINGS_DOC), data, { merge: true });
 }
+
+
+

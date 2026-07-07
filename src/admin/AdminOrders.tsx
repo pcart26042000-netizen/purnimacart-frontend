@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { Search, Eye, X, MapPin, Package, CreditCard } from 'lucide-react';
 import type { FirestoreOrder, OrderStatus } from '../types/firestore';
 import { useAdminOrders } from './hooks/useAdminOrders';
@@ -12,13 +12,13 @@ const PAGE_SIZE = 10;
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
   pending: 'bg-amber-50 text-amber-600',
-  packed: 'bg-blue-50 text-blue-600',
+  packed: 'bg-primary/10 text-primary',
   shipped: 'bg-violet-50 text-violet-600',
   delivered: 'bg-emerald-50 text-emerald-600',
   cancelled: 'bg-red-50 text-red-500',
 };
 
-// What an admin is allowed to move an order to from its current status —
+// What an admin is allowed to move an order to from its current status â€”
 // mirrors ALLOWED_TRANSITIONS in functions/src/orderAdmin.ts so the UI never
 // offers an option the server will reject.
 const NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
@@ -51,7 +51,7 @@ function OrderDetailModal({
     setSaving(true);
     try {
       await updateOrderStatusAdmin(order.id, status, trackingNote);
-      onToast(status === 'cancelled' ? 'Order cancelled — stock restored.' : `Order marked as ${status}.`);
+      onToast(status === 'cancelled' ? 'Order cancelled â€” stock restored.' : `Order marked as ${status}.`);
       onClose();
     } catch (error: any) {
       console.error(error);
@@ -105,8 +105,8 @@ function OrderDetailModal({
                     <p className="text-xs font-semibold text-[#291715] truncate">{item.name}</p>
                     <p className="text-[10px] text-[#5e3f3b]/60">
                       Qty {item.qty}
-                      {item.variant?.size ? ` · ${item.variant.size}` : ''}
-                      {item.variant?.color ? ` · ${item.variant.color}` : ''}
+                      {item.variant?.size ? ` Â· ${item.variant.size}` : ''}
+                      {item.variant?.color ? ` Â· ${item.variant.color}` : ''}
                     </p>
                   </div>
                   <span className="text-xs font-bold text-[#291715] shrink-0">₹{(item.price * item.qty).toLocaleString('en-IN')}</span>
@@ -125,7 +125,7 @@ function OrderDetailModal({
             </div>
             {order.discount > 0 && (
               <div className="flex justify-between text-emerald-600">
-                <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span><span>−₹{order.discount.toLocaleString('en-IN')}</span>
+                <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span><span>âˆ’₹{order.discount.toLocaleString('en-IN')}</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-[#291715] pt-1.5 border-t border-[#e8bcb7]/20">
@@ -241,7 +241,7 @@ export default function AdminOrders({ onToast }: AdminOrdersProps) {
 
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  if (loading) return <LoadingBlock label="Loading orders…" />;
+  if (loading) return <LoadingBlock label="Loading ordersâ€¦" />;
   if (error) return <ErrorBlock message={error} />;
 
   return (
@@ -295,9 +295,9 @@ export default function AdminOrders({ onToast }: AdminOrdersProps) {
                 {paged.map((o) => (
                   <tr key={o.id} className="hover:bg-[#fff8f7] transition-colors">
                     <td className="px-5 py-3.5 font-mono text-xs font-bold text-[#291715]">{o.id.slice(0, 10)}</td>
-                    <td className="px-5 py-3.5 text-[#291715] font-medium">{o.addressSnapshot?.fullName || '—'}</td>
+                    <td className="px-5 py-3.5 text-[#291715] font-medium">{o.addressSnapshot?.fullName || 'â€”'}</td>
                     <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs">
-                      {o.createdAt?.toDate?.() ? o.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                      {o.createdAt?.toDate?.() ? o.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'â€”'}
                     </td>
                     <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs">{o.items.reduce((a, i) => a + i.qty, 0)}</td>
                     <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs">{o.paymentMethod === 'cod' ? 'COD' : 'Razorpay'}</td>
@@ -331,3 +331,5 @@ export default function AdminOrders({ onToast }: AdminOrdersProps) {
     </div>
   );
 }
+
+

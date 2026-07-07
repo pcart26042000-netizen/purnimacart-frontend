@@ -1,10 +1,11 @@
-export interface Product {
+﻿export interface Product {
   id: string;
   name: string;
   category: string;
   price: number;
   originalPrice?: number;
   image: string;
+  images?: string[];
   rating: number;
   reviewCount: number;
   tags: string[];
@@ -12,6 +13,8 @@ export interface Product {
   isDeal?: boolean;
   dealDiscount?: string;
   features?: string[];
+  returnWindow?: string;
+  isFiveMinBadge?: boolean;
 }
 
 export interface CartItem {
@@ -32,6 +35,15 @@ export type PageType =
   | 'my-orders'
   | 'order-details'
   | 'addresses'
+  | 'contact'
+  | 'about-us'
+  | 'faq'
+  | 'privacy-policy'
+  | 'terms-conditions'
+  | 'refund-return-policy'
+  | 'shipping-policy'
+  | 'cancellation-policy'
+  | 'cookie-policy'
   | 'admin';
 
 export type AdminSection =
@@ -49,6 +61,7 @@ export interface Category {
   name: string;
   iconName: string;
   count: number;
+  image?: string;
 }
 
 export interface Review {
@@ -58,3 +71,5 @@ export interface Review {
   date: string;
   comment: string;
 }
+
+

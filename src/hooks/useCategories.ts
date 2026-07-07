@@ -48,7 +48,7 @@ export function useCategories(products: Product[] = []): UseCategoriesResult {
   }, {});
 
   const categories: Category[] = [
-    { id: 'all', name: 'All Products', iconName: 'grid', count: products.length },
+    { id: 'all', name: 'For You', iconName: 'grid', count: products.length },
     ...rawCategories
       .filter((c) => c.isActive !== false)
       .map((c) => categoryFromFirestore(c, counts[c.slug] ?? 0)),

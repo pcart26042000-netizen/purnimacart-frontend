@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   IndianRupee, ShoppingBag, Clock, CheckCircle2, AlertTriangle, Star,
   Package, Users, Ticket,
@@ -21,7 +21,7 @@ function KpiCard({
   const toneStyles: Record<string, string> = {
     primary: 'bg-primary/10 text-primary',
     amber: 'bg-amber-50 text-amber-600',
-    blue: 'bg-blue-50 text-blue-600',
+    blue: 'bg-primary/10 text-primary',
     emerald: 'bg-emerald-50 text-emerald-600',
     violet: 'bg-violet-50 text-violet-600',
   };
@@ -136,7 +136,7 @@ function SalesChart({ data, totalRevenue }: { data: SalesDay[]; totalRevenue: nu
 export default function AdminDashboard() {
   const { stats, loading, error } = useAdminDashboard();
 
-  if (loading) return <LoadingBlock label="Crunching the numbers…" />;
+  if (loading) return <LoadingBlock label="Crunching the numbersâ€¦" />;
   if (error) return <ErrorBlock message={error} />;
 
   return (
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
                     <p className="text-xs font-semibold text-[#291715] truncate">{p.name}</p>
                     <p className="text-[10px] text-[#5e3f3b]/60 flex items-center gap-1">
                       <Star size={10} className="fill-amber-400 text-amber-400" />
-                      {p.rating} · {p.reviewCount} reviews
+                      {p.rating} Â· {p.reviewCount} reviews
                     </p>
                   </div>
                   <span className="text-xs font-bold text-primary shrink-0">₹{p.price.toLocaleString('en-IN')}</span>
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-mono font-semibold text-[#291715] truncate">#{o.id.slice(0, 10)}</p>
-                    <p className="text-[10px] text-[#5e3f3b]/60 capitalize">{o.orderStatus} · {o.paymentMethod.toUpperCase()}</p>
+                    <p className="text-[10px] text-[#5e3f3b]/60 capitalize">{o.orderStatus} Â· {o.paymentMethod.toUpperCase()}</p>
                   </div>
                   <span className="text-xs font-bold text-primary shrink-0">₹{o.total.toLocaleString('en-IN')}</span>
                 </div>
@@ -248,3 +248,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+

@@ -63,11 +63,10 @@ export async function loadAddress(uid: string, addressId: string): Promise<Addre
   return address;
 }
 
-export async function getStoreDeliveryCharge(subtotal: number): Promise<number> {
+export async function getStoreDeliveryCharge(subtotal: number, totalQty: number): Promise<number> {
   const snap = await db.doc('settings/store').get();
-  const settings = snap.exists ? snap.data() as { deliveryCharge?: number; freeDeliveryThreshold?: number } : {};
-  const deliveryCharge = settings.deliveryCharge ?? 49;
-  const freeThreshold = settings.freeDeliveryThreshold ?? 999;
+  const settings = snap.exists ? snap.data() as { deliveryCharge?: number } : {};
+  const deliveryCharge = settings.deliveryCharge ?? 15;
   if (subtotal === 0) return 0;
-  return subtotal >= freeThreshold ? 0 : deliveryCharge;
+  return totalQty * deliveryCharge;
 }

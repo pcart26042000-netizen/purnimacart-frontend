@@ -30,6 +30,7 @@ type ProductFormState = {
   returnWindow: ReturnWindow;
   isActive: boolean;
   isFeatured: boolean;
+  isFiveMinBadge: boolean;
   images: string[];
   variants: ProductVariant[];
 };
@@ -47,6 +48,7 @@ const EMPTY_FORM: ProductFormState = {
   returnWindow: '7-day',
   isActive: true,
   isFeatured: false,
+  isFiveMinBadge: false,
   images: [],
   variants: [],
 };
@@ -65,6 +67,7 @@ function toFormState(p: FirestoreProduct): ProductFormState {
     returnWindow: p.returnWindow,
     isActive: p.isActive,
     isFeatured: !!p.isFeatured,
+    isFiveMinBadge: !!p.isFiveMinBadge,
     images: p.images,
     variants: p.variants || [],
   };
@@ -143,6 +146,7 @@ function ProductFormModal({
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
         isActive: form.isActive,
         isFeatured: form.isFeatured,
+        isFiveMinBadge: form.isFiveMinBadge,
       };
       if (initial) {
         await updateProduct(initial.id, payload);
@@ -344,6 +348,7 @@ function ProductFormModal({
           <div className="flex items-center gap-6">
             <Toggle checked={form.isActive} onChange={(v) => set('isActive', v)} label="Active (visible in store)" />
             <Toggle checked={form.isFeatured} onChange={(v) => set('isFeatured', v)} label="Featured" />
+            <Toggle checked={form.isFiveMinBadge} onChange={(v) => set('isFiveMinBadge', v)} label="5 Min Badge" />
           </div>
         </div>
 
@@ -447,6 +452,7 @@ export default function AdminProducts({ onToast }: AdminProductsProps) {
                   <th className="px-5 py-3.5 font-bold">Price</th>
                   <th className="px-5 py-3.5 font-bold">Stock</th>
                   <th className="px-5 py-3.5 font-bold">Status</th>
+                  <th className="px-5 py-3.5 font-bold">5 Min</th>
                   <th className="px-5 py-3.5 font-bold text-right">Actions</th>
                 </tr>
               </thead>
@@ -476,6 +482,11 @@ export default function AdminProducts({ onToast }: AdminProductsProps) {
                     <td className="px-5 py-3.5">
                       <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${p.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-[#5e3f3b]/10 text-[#5e3f3b]/60'}`}>
                         {p.isActive ? 'Active' : 'Hidden'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${p.isFiveMinBadge ? 'bg-green-50 text-green-700' : 'bg-[#5e3f3b]/10 text-[#5e3f3b]/60'}`}>
+                        {p.isFiveMinBadge ? 'Yes' : 'No'}
                       </span>
                     </td>
                     <td className="px-5 py-3.5">
@@ -519,3 +530,5 @@ export default function AdminProducts({ onToast }: AdminProductsProps) {
     </div>
   );
 }
+
+

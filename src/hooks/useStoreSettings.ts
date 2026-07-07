@@ -12,6 +12,8 @@ const DEFAULTS: StoreSettings = {
   storeAddress: '',
   taxPercent: 0,
   socialLinks: {},
+  fiveMinDeliveryAvailable: false,
+  fiveMinDeliveryPincode: '732101',
 };
 
 export function useStoreSettings() {
@@ -36,3 +38,6 @@ export function useStoreSettings() {
 
   return { settings, loading };
 }
+
+
+

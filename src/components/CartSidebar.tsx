@@ -76,7 +76,8 @@ export default function CartSidebar({
     setCouponError('');
   };
 
-  const deliveryFee = subtotal >= freeDeliveryThreshold || subtotal === 0 ? 0 : deliveryCharge;
+  const totalQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const deliveryFee = totalQty * deliveryCharge;
   const discountAmount = appliedCoupon
     ? appliedCoupon.type === 'flat'
       ? Math.min(appliedCoupon.value, subtotal)
@@ -249,33 +250,33 @@ export default function CartSidebar({
               {couponSuccess && <p className="text-[10px] font-bold text-emerald-600 px-1">{couponSuccess}</p>}
 
               {/* Price list breakdown */}
-              <div className="space-y-2 text-xs text-[#5e3f3b] pt-2 border-t border-[#e8bcb7]/10">
+              <div className="space-y-2 text-xs text-gray-500 pt-2 border-t border-gray-200">
                 <div className="flex justify-between">
-                  <span>Bag Subtotal</span>
-                  <span className="font-bold text-[#291715]">₹{subtotal.toLocaleString()}</span>
+                  <span>Price ({totalQty} item{totalQty > 1 ? 's' : ''})</span>
+                  <span className="font-semibold text-gray-900">₹{subtotal.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Boutique Delivery</span>
-                  <span className="font-bold text-[#291715]">
-                    {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toLocaleString()}`}
+                  <span>Delivery Charges</span>
+                  <span className="font-semibold text-gray-900">
+                    {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toLocaleString('en-IN')}`}
                   </span>
                 </div>
                 {appliedCoupon && (
-                  <div className="flex justify-between text-emerald-600 font-medium">
+                  <div className="flex justify-between text-green-600 font-semibold">
                     <span>Coupon Discount</span>
-                    <span>-₹{discountAmount.toLocaleString()}</span>
+                    <span>-₹{discountAmount.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm font-black text-[#291715] pt-2 border-t border-[#e8bcb7]/10">
-                  <span>Final Total</span>
-                  <span className="text-primary text-base font-bold">₹{finalTotal.toLocaleString()}</span>
+                <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-200">
+                  <span>Total Amount</span>
+                  <span className="text-gray-900 text-base font-black">₹{finalTotal.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
               {/* Secure Checkout button */}
               <button
                 onClick={handleCheckoutClick}
-                className="w-full bg-primary hover:bg-[#9a000e] text-white py-4 rounded-xl font-bold text-sm transition-all shadow-lg shadow-primary/25 mt-4 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                className="w-full bg-[#fb641b] hover:bg-[#e0540d] text-white py-4 rounded-sm font-bold text-sm transition-all shadow-md mt-4 flex items-center justify-center gap-2 cursor-pointer active:scale-95 uppercase"
               >
                 Proceed to Checkout
               </button>

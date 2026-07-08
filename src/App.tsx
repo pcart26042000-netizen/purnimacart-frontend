@@ -32,6 +32,11 @@ import OrderHistoryPage from './components/OrderHistoryPage';
 import OrderDetailsPage from './components/OrderDetailsPage';
 import AddressBook from './components/AddressBook';
 import { PrivacyPolicyPage, TermsConditionsPage, RefundReturnPolicyPage, ShippingPolicyPage, CancellationPolicyPage, ContactPage } from './components/PolicyPages';
+import dealSoundbar from './deal_soundbar.png';
+import dealPrinter from './deal_printer.png';
+import dealHeadphones from './deal_headphones.png';
+import dealToyLaptop from './deal_toy_laptop.png';
+import singleCollectionBanner from './single_collection_banner.png';
 
 import AdminLayout from './admin/AdminLayout';
 import AdminDashboard from './admin/AdminDashboard';
@@ -289,6 +294,16 @@ export default function App() {
     }
   };
 
+  const handleBuyNow = async (product: Product, quantity = 1, color = 'Classic', size = 'Standard') => {
+    try {
+      await addToCartFs(product, quantity, color, size);
+      setCurrentPage('checkout');
+    } catch (error: any) {
+      console.error(error);
+      triggerToast(error.message || 'Could not process Buy Now.', 'info');
+    }
+  };
+
   const handleUpdateCartQuantity = async (productId: string, quantity: number, color?: string, size?: string) => {
     try {
       await updateCartQuantityFs(productId, quantity, color, size);
@@ -492,6 +507,8 @@ export default function App() {
           }
           setCurrentPage('checkout');
         }}
+        isFiveMinActive={isFiveMinActive}
+        fiveMinMinOrderValue={storeSettings.fiveMinMinOrderValue}
       />
 
       {/* Main Container Views switcher */}
@@ -610,6 +627,182 @@ export default function App() {
                     isFiveMinActive={isFiveMinActive}
                   />
                 ))}
+              </div>
+            </section>
+
+            {/* 4-Item Deal Showcase Grid Section */}
+            <section className="bg-white border border-[#e8bcb7]/25 rounded-[32px] p-6 sm:p-8 max-w-4xl mx-auto shadow-sm space-y-6">
+              <h2 className="font-display font-extrabold text-xl sm:text-2xl text-[#291715] tracking-tight">
+                {storeSettings.dealShowcaseTitle !== undefined && storeSettings.dealShowcaseTitle !== ''
+                  ? storeSettings.dealShowcaseTitle
+                  : 'Lowest Prices in the Year'}
+              </h2>
+
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                {/* Item 1 */}
+                <div
+                  onClick={() => {
+                    const cat = (storeSettings.dealItem1Link || 'accessories').trim().toLowerCase();
+                    if (cat) {
+                      setSelectedCategory(cat);
+                      setCurrentPage('category');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
+                  className="flex flex-col group cursor-pointer"
+                >
+                  <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
+                    <img
+                      src={storeSettings.dealItem1Image || dealSoundbar}
+                      alt={storeSettings.dealItem1Title || 'Soundbars'}
+                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    {(storeSettings.dealItem1Badge !== undefined ? storeSettings.dealItem1Badge : 'Up to 80% Off') && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
+                        {storeSettings.dealItem1Badge !== undefined ? storeSettings.dealItem1Badge : 'Up to 80% Off'}
+                      </div>
+                    )}
+                  </div>
+                  <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
+                    {storeSettings.dealItem1Title !== undefined ? storeSettings.dealItem1Title : 'Soundbars'}
+                  </span>
+                </div>
+
+                {/* Item 2 */}
+                <div
+                  onClick={() => {
+                    const cat = (storeSettings.dealItem2Link || 'accessories').trim().toLowerCase();
+                    if (cat) {
+                      setSelectedCategory(cat);
+                      setCurrentPage('category');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
+                  className="flex flex-col group cursor-pointer"
+                >
+                  <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
+                    <img
+                      src={storeSettings.dealItem2Image || dealPrinter}
+                      alt={storeSettings.dealItem2Title || 'Multi Function Printers'}
+                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    {(storeSettings.dealItem2Badge !== undefined ? storeSettings.dealItem2Badge : 'Up to 20% Off') && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
+                        {storeSettings.dealItem2Badge !== undefined ? storeSettings.dealItem2Badge : 'Up to 20% Off'}
+                      </div>
+                    )}
+                  </div>
+                  <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
+                    {storeSettings.dealItem2Title !== undefined ? storeSettings.dealItem2Title : 'Multi Function Printers'}
+                  </span>
+                </div>
+
+                {/* Item 3 */}
+                <div
+                  onClick={() => {
+                    const cat = (storeSettings.dealItem3Link || 'accessories').trim().toLowerCase();
+                    if (cat) {
+                      setSelectedCategory(cat);
+                      setCurrentPage('category');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
+                  className="flex flex-col group cursor-pointer"
+                >
+                  <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
+                    <img
+                      src={storeSettings.dealItem3Image || dealHeadphones}
+                      alt={storeSettings.dealItem3Title || 'Headphones'}
+                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    {(storeSettings.dealItem3Badge !== undefined ? storeSettings.dealItem3Badge : 'Up to 60% Off') && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
+                        {storeSettings.dealItem3Badge !== undefined ? storeSettings.dealItem3Badge : 'Up to 60% Off'}
+                      </div>
+                    )}
+                  </div>
+                  <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
+                    {storeSettings.dealItem3Title !== undefined ? storeSettings.dealItem3Title : 'Headphones'}
+                  </span>
+                </div>
+
+                {/* Item 4 */}
+                <div
+                  onClick={() => {
+                    const cat = (storeSettings.dealItem4Link || 'toys').trim().toLowerCase();
+                    if (cat) {
+                      setSelectedCategory(cat);
+                      setCurrentPage('category');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
+                  className="flex flex-col group cursor-pointer"
+                >
+                  <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
+                    <img
+                      src={storeSettings.dealItem4Image || dealToyLaptop}
+                      alt={storeSettings.dealItem4Title || 'Kids Laptops and Tablets'}
+                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    {(storeSettings.dealItem4Badge !== undefined ? storeSettings.dealItem4Badge : 'Up to 70% Off') && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
+                        {storeSettings.dealItem4Badge !== undefined ? storeSettings.dealItem4Badge : 'Up to 70% Off'}
+                      </div>
+                    )}
+                  </div>
+                  <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
+                    {storeSettings.dealItem4Title !== undefined ? storeSettings.dealItem4Title : 'Kids Laptops and Tablets'}
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            {/* Single Collection Banner Section (800x1200 px responsive aspect ratio) */}
+            <section className="max-w-4xl mx-auto">
+              <div
+                onClick={() => {
+                  const cat = (storeSettings.singleBannerCategory || 'dresses').trim().toLowerCase();
+                  if (cat) {
+                    setSelectedCategory(cat);
+                    setCurrentPage('category');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
+                className="relative aspect-[2/3] sm:aspect-[3/2] w-full rounded-[32px] overflow-hidden border border-[#e8bcb7]/25 shadow-md group cursor-pointer"
+              >
+                <img
+                  src={storeSettings.singleBannerImage || singleCollectionBanner}
+                  alt={storeSettings.singleBannerTitle || 'Luxury Apparel'}
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-102"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/60 via-black/30 to-transparent flex flex-col justify-end sm:justify-center p-8 sm:p-12 text-white">
+                  <div className="max-w-md space-y-3 sm:space-y-4">
+                    {(storeSettings.singleBannerSubtitle !== undefined ? storeSettings.singleBannerSubtitle : 'Exclusive Summer Collection') && (
+                      <span className="text-[10px] sm:text-xs uppercase font-extrabold tracking-widest text-[#fedbd6] bg-primary/20 px-3 py-1 rounded-full border border-primary/25 w-fit block">
+                        {storeSettings.singleBannerSubtitle !== undefined ? storeSettings.singleBannerSubtitle : 'Exclusive Summer Collection'}
+                      </span>
+                    )}
+                    {(storeSettings.singleBannerTitle !== undefined ? storeSettings.singleBannerTitle : 'Luxury Apparel') && (
+                      <h2 className="text-3xl sm:text-4xl font-display font-black tracking-tight leading-tight">
+                        {storeSettings.singleBannerTitle !== undefined ? storeSettings.singleBannerTitle : 'Luxury Apparel'}
+                      </h2>
+                    )}
+                    {(storeSettings.singleBannerCtaText !== undefined ? storeSettings.singleBannerCtaText : 'Shop Collection') && (
+                      <button
+                        type="button"
+                        className="bg-primary hover:bg-[#9a000e] text-white px-6 py-3 rounded-xl font-bold text-xs transition-all shadow-lg shadow-primary/25 cursor-pointer w-fit flex items-center gap-2"
+                      >
+                        {storeSettings.singleBannerCtaText !== undefined ? storeSettings.singleBannerCtaText : 'Shop Collection'}
+                        <ArrowRight size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </section>
             {/* Email Inner circle newsletter signup */}
@@ -732,6 +925,7 @@ export default function App() {
               setCurrentPage('home');
             }}
             onAddToCart={(p, q, c, s) => handleAddToCart(p, q, c, s)}
+            onBuyNow={(p, q, c, s) => handleBuyNow(p, q, c, s)}
             isWishlisted={isWishlisted(currentSelectedProduct.id)}
             onToggleWishlist={handleToggleWishlist}
             isFiveMinActive={isFiveMinActive}
@@ -869,6 +1063,10 @@ export default function App() {
             onOrderPlaced={handleOrderPlaced}
             onBack={() => setCurrentPage('home')}
             onToast={triggerToast}
+            onUpdateQuantity={handleUpdateCartQuantity}
+            onRemoveItem={handleRemoveCartItem}
+            isFiveMinActive={isFiveMinActive}
+            fiveMinMinOrderValue={storeSettings.fiveMinMinOrderValue}
           />
         )}
 

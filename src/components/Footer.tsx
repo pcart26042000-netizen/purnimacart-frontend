@@ -116,8 +116,8 @@ export default function Footer({ onSelectCategory, setCurrentPage }: FooterProps
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-[#291715] mb-4">Social Links</h3>
               <div className="flex flex-wrap gap-3 text-sm text-[#5e3f3b]">
-                <a href="https://instagram.com/" target="_blank" rel="noreferrer" className="hover:text-primary inline-flex items-center gap-1"><Instagram size={15} /> Instagram</a>
-                <a href="https://facebook.com/" target="_blank" rel="noreferrer" className="hover:text-primary inline-flex items-center gap-1"><Facebook size={15} /> Facebook</a>
+                <a href="https://www.instagram.com/pcart.in?igsh=YnNnZDd6cGo3NTJr&utm_source=qr" target="_blank" rel="noreferrer" className="hover:text-primary inline-flex items-center gap-1"><Instagram size={15} /> Instagram</a>
+                <a href="https://www.facebook.com/share/1X4FPhutYJ/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="hover:text-primary inline-flex items-center gap-1"><Facebook size={15} /> Facebook</a>
                 <a href="https://youtube.com/" target="_blank" rel="noreferrer" className="hover:text-primary inline-flex items-center gap-1"><Youtube size={15} /> YouTube</a>
               </div>
             </div>

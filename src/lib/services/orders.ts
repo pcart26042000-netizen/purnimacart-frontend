@@ -1,9 +1,8 @@
 // Order service — orders/{orderId}
 import {
-  collection, doc, getDoc, getDocs, onSnapshot, query, where, orderBy,
+  collection, doc, getDoc, getDocs, onSnapshot, query, where, orderBy, runTransaction, Timestamp
 } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { db, functions } from '../firebase';
+import { db, auth } from '../firebase';
 import type { FirestoreOrder, OrderItem, Address, PaymentMethod, OrderStatus } from '../../types/firestore';
 
 const COL = 'orders';
@@ -89,6 +88,47 @@ export async function updateOrderStatusAdmin(
   status: OrderStatus,
   trackingNote?: string
 ): Promise<void> {
-  const fn = httpsCallable(functions, 'adminUpdateOrderStatus');
-  await fn({ orderId, status, trackingNote });
+  try {
+    await runTransaction(db, async (transaction) => {
+      const orderRef = doc(db, COL, orderId);
+      const orderSnap = await transaction.get(orderRef);
+      if (!orderSnap.exists()) {
+        throw new Error('Order not found.');
+      }
+      const orderData = orderSnap.data() as FirestoreOrder;
+      
+      const updates: any = {
+        orderStatus: status,
+        updatedAt: Timestamp.now(),
+      };
+      
+      if (trackingNote !== undefined) {
+        updates.trackingNote = trackingNote;
+      }
+      
+      if (status === 'cancelled' && orderData.orderStatus !== 'cancelled') {
+        // Restore stock
+        for (const item of orderData.items) {
+          const prodRef = doc(db, 'products', item.productId);
+          const prodSnap = await transaction.get(prodRef);
+          if (prodSnap.exists()) {
+            const prodData = prodSnap.data();
+            transaction.update(prodRef, {
+              stock: prodData.stock + item.qty,
+            });
+          }
+        }
+        
+        // Mark payment as refunded if it was paid
+        if (orderData.paymentStatus === 'paid') {
+          updates.paymentStatus = 'refunded';
+        }
+      }
+      
+      transaction.update(orderRef, updates);
+    });
+  } catch (error: any) {
+    console.error('updateOrderStatusAdmin error:', error);
+    throw error;
+  }
 }

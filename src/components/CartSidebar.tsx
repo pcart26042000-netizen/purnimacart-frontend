@@ -13,6 +13,8 @@ interface CartSidebarProps {
   onProceedToCheckout: () => void;
   deliveryCharge?: number;
   freeDeliveryThreshold?: number;
+  isFiveMinActive?: boolean;
+  fiveMinMinOrderValue?: number;
 }
 
 export default function CartSidebar({
@@ -24,6 +26,8 @@ export default function CartSidebar({
   onProceedToCheckout,
   deliveryCharge = 49,
   freeDeliveryThreshold = 999,
+  isFiveMinActive = false,
+  fiveMinMinOrderValue = 0,
 }: CartSidebarProps) {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<FirestoreCoupon | null>(null);
@@ -269,14 +273,25 @@ export default function CartSidebar({
                 )}
                 <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-200">
                   <span>Total Amount</span>
-                  <span className="text-gray-900 text-base font-black">₹{finalTotal.toLocaleString('en-IN')}</span>
+                  <span className="text-gray-900 text-base font-black">₹{finalTotal.toLocaleString()}</span>
                 </div>
               </div>
+
+              {/* 5-Min delivery minimum order block */}
+              {isFiveMinActive && subtotal < fiveMinMinOrderValue && (
+                <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-2xl text-[11px] font-semibold flex items-start gap-2 mt-2 leading-relaxed">
+                  <span className="shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-red-100 text-red-700 font-bold text-[9px]">!</span>
+                  <span>
+                    Minimum order of ₹{fiveMinMinOrderValue.toLocaleString()} is required for 5-Minute Delivery. Add ₹{(fiveMinMinOrderValue - subtotal).toLocaleString()} more to checkout.
+                  </span>
+                </div>
+              )}
 
               {/* Secure Checkout button */}
               <button
                 onClick={handleCheckoutClick}
-                className="w-full bg-[#fb641b] hover:bg-[#e0540d] text-white py-4 rounded-sm font-bold text-sm transition-all shadow-md mt-4 flex items-center justify-center gap-2 cursor-pointer active:scale-95 uppercase"
+                disabled={isFiveMinActive && subtotal < fiveMinMinOrderValue}
+                className="w-full bg-[#fb641b] hover:bg-[#e0540d] text-white py-4 rounded-sm font-bold text-sm transition-all shadow-md mt-4 flex items-center justify-center gap-2 cursor-pointer active:scale-95 uppercase disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Proceed to Checkout
               </button>

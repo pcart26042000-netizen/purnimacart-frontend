@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /checkout-success/
+Disallow: /order-details/
+
+Sitemap: https://purnimacart.com/sitemap.xml

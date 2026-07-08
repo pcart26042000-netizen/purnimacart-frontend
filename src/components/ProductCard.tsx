@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
 import { Product } from '../types';
 import FiveMinDeliveryBadge from './FiveMinDeliveryBadge';
@@ -28,78 +28,92 @@ export default function ProductCard({
   return (
     <div
       onClick={() => onProductClick(product.id)}
-      className="bg-white rounded-2xl border border-gray-150 overflow-hidden product-card-shadow group relative cursor-pointer flex flex-col h-full justify-between transition-all duration-300 hover:shadow-md hover:translate-y-[-2px]"
+      className="group relative cursor-pointer flex flex-col w-full transition-all duration-300 hover:translate-y-[-2px]"
     >
-      {/* Wishlist Button */}
-      <button
-        onClick={(e) => onToggleWishlist(product, e)}
-        className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/95 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all duration-300 shadow-sm active:scale-90 cursor-pointer"
-        title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
-      >
-        <Heart
-          size={15}
-          className={`transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
-        />
-      </button>
-
-      {/* Card Image */}
-      <div className="aspect-square overflow-hidden relative bg-white p-3 flex items-center justify-center border-b border-gray-100 h-48 sm:h-52">
+      {/* Card Image Container */}
+      <div className="aspect-[3/4] w-full rounded-2xl overflow-hidden relative bg-white border border-gray-100 shadow-sm flex items-center justify-center">
         <img
           src={product.image}
           alt={product.name}
-          className="max-h-full max-w-full object-contain transition-transform duration-700 ease-out group-hover:scale-105"
+          className="w-full h-full object-contain p-3.5 transition-transform duration-700 ease-out group-hover:scale-105"
           loading="lazy"
         />
+
+        {/* Wishlist Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleWishlist(product, e);
+          }}
+          className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-[2px] border border-gray-100/50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all duration-300 shadow-sm active:scale-90 cursor-pointer"
+          title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+        >
+          <Heart
+            size={14}
+            className={`transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
+          />
+        </button>
+
+        {/* Rating overlay on bottom-left of image */}
+        {product.rating > 0 && (
+          <div className="absolute bottom-2.5 left-2.5 z-10 bg-white/90 backdrop-blur-[2px] border border-gray-100/50 rounded-full px-2 py-0.5 text-[9px] sm:text-[10px] font-extrabold text-gray-800 flex items-center gap-1 shadow-sm">
+            <span>{product.rating}</span>
+            <Star size={10} className="fill-emerald-600 text-emerald-600" />
+            <span className="text-gray-300 font-normal">|</span>
+            <span className="text-gray-500 font-semibold">{product.reviewCount}</span>
+          </div>
+        )}
+
+        {/* Quick Add to Cart button on bottom-right of image */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart(product, e);
+          }}
+          className="absolute bottom-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-hover active:scale-95 transition-all duration-300 shadow-md cursor-pointer"
+          title="Add to Cart"
+        >
+          <ShoppingCart size={13} />
+        </button>
       </div>
 
       {/* Product Content Details */}
-      <div className="p-3 flex flex-col flex-grow justify-between">
-        <div className="space-y-1">
-          <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold block">
+      <div className="pt-2.5 px-0.5 flex flex-col gap-0.5">
+        {/* Brand/Category & Name row */}
+        <div className="flex items-baseline gap-1.5 flex-wrap">
+          <span className="text-[10px] sm:text-[11px] font-extrabold text-primary uppercase tracking-wide">
             {product.category}
           </span>
-          <h3 className="font-sans font-bold text-xs text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
+          <h3 className="font-sans font-bold text-[11px] sm:text-xs text-gray-900 group-hover:text-primary transition-colors line-clamp-1 flex-1">
             {product.name}
           </h3>
-
-          {/* Rating */}
-          <div className="flex items-center gap-1.5 pt-0.5">
-            <span className="bg-[#388e3c] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5">
-              {product.rating} <span className="text-[7px]">â˜…</span>
-            </span>
-            <span className="text-[10px] text-gray-400 font-semibold">({product.reviewCount})</span>
-          </div>
-
-          <div className="pt-1">
-            <FiveMinDeliveryBadge product={product} isActive={isFiveMinActive} />
-          </div>
         </div>
 
-        <div className="pt-2">
-          {/* Pricing Row */}
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="text-gray-900 font-black text-sm">
-              ₹{product.price.toLocaleString('en-IN')}
+        {/* Pricing Row */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {product.originalPrice && (
+            <span className="text-emerald-600 text-[11px] sm:text-xs font-extrabold flex items-center">
+              ↓{discountPercent}%
             </span>
-            {product.originalPrice && (
-              <>
-                <span className="text-gray-400 line-through text-[11px]">
-                  ₹{product.originalPrice.toLocaleString('en-IN')}
-                </span>
-                <span className="text-[#388e3c] text-[11px] font-bold">
-                  {discountPercent}% off
-                </span>
-              </>
-            )}
-          </div>
+          )}
+          {product.originalPrice && (
+            <span className="text-gray-400 line-through text-[10px] sm:text-[11px]">
+              ₹{product.originalPrice.toLocaleString('en-IN')}
+            </span>
+          )}
+          <span className="text-gray-950 font-black text-[12px] sm:text-sm">
+            ₹{product.price.toLocaleString('en-IN')}
+          </span>
+        </div>
 
-          <button
-            onClick={(e) => onAddToCart(product, e)}
-            className="w-full py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer shadow-sm shadow-primary/10"
-          >
-            <ShoppingCart size={13} />
-            Add to Cart
-          </button>
+        {/* Badges/Offers */}
+        <div className="flex flex-wrap gap-1 items-center pt-0.5">
+          <FiveMinDeliveryBadge product={product} isActive={isFiveMinActive} />
+          {discountPercent >= 20 && (
+            <span className="bg-[#fff0ee] text-primary text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded border border-primary/10">
+              WOW Offer
+            </span>
+          )}
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Mail, MapPin, Phone, MessageCircle, Truck, RotateCcw, Ban, Scale, LockKeyhole, BadgeInfo } from 'lucide-react';
 
 type Section = {
@@ -94,43 +94,55 @@ export function PrivacyPolicyPage() {
   return (
     <PageShell
       eyebrow="Privacy Policy"
-      title="How PurnimaCart handles your data"
-      intro="We collect only the information needed to process orders, deliver products, support your account, and improve the shopping experience. This draft policy matches the current storefront and can be replaced with your final legal text later."
+      title="Privacy Policy"
+      intro="At PurnimaCart, we prioritize your privacy. This policy outlines how we collect, process, secure, and manage your personal data when you shop or interact with us."
       icon={LockKeyhole}
-      note="Draft policy content. If you want, I can tailor it to your exact legal/business details next."
       sections={[
         {
-          title: 'Information we collect',
+          title: '1. Information We Collect',
           body: [
-            'We may collect your name, email address, phone number, delivery address, order history, and payment-related metadata when you shop or contact us.',
-            'We also collect basic device and usage information to keep the site secure and understand how customers use the store.',
+            'To process your transactions and support your shopping experience, we collect the following information:',
+          ],
+          bullets: [
+            'Personal Identifiers: Full name, phone number, email address, and shipping/billing addresses.',
+            'Authentication Data: Basic account indicators retrieved when you log in via Google Authentication.',
+            'Order History: Products bought, pricing details, color/size selections, and transaction metadata.',
+            'Technical Logs: Device IP address, browser type, and navigation activity to maintain platform security.',
           ],
         },
         {
-          title: 'How we use your information',
+          title: '2. How We Use Your Data',
           body: [
-            'We use your information to process orders, send order updates, provide support, prevent fraud, and improve the store experience.',
-            'We may also use your contact information to respond to questions, share service notifications, or send promotional updates if you have opted in.',
+            'Your data is processed in accordance with legal and operational guidelines for the following purposes:',
+          ],
+          bullets: [
+            'Order Processing & Fulfilment: Verifying payments, preparing packages, and delivering items via shipping partners.',
+            'Service Communication: Sending order confirmations, dispatch updates, and delivery alerts.',
+            'Customer Support: Answering queries, addressing concerns, and managing return/refund tickets.',
+            'Fraud Prevention: Safeguarding transactions, preventing unauthorized checkouts, and verifying COD orders.',
           ],
         },
         {
-          title: 'Sharing and security',
+          title: '3. Data Security & Storage',
           body: [
-            'We do not sell your personal information. We only share data with trusted service providers that help us run the store, such as payment, shipping, or cloud services.',
-            'We use reasonable administrative and technical safeguards to protect your data, but no online system can be guaranteed 100% secure.',
+            'We implement advanced security controls to protect your data:',
+            'Secure Cloud Servers: All client data, addresses, and carts are stored on encrypted Firebase Cloud Firestore databases.',
+            'Payment Gateway Protection: All online payment processing is handled securely by Razorpay. We do not store or process card numbers or banking passwords on our local servers.',
           ],
         },
         {
-          title: 'Cookies and retention',
+          title: '4. Third-Party Sharing',
           body: [
-            'Cookies and similar technologies may be used for login sessions, cart storage, and basic analytics.',
-            'We keep order and support data only as long as needed for business, legal, and security purposes.',
+            'We do not sell, rent, or trade your personal data. We only share information with trusted third-party providers required for store operations:',
+            'Shipping Partners: Shared delivery address and phone number for parcel transport.',
+            'Razorpay: Transaction details for payment processing and verification.',
+            'Firebase (Google Cloud): Database hosting, authentication, and security logging.',
           ],
         },
         {
-          title: 'Contact',
+          title: '5. Cookies & Local Storage',
           body: [
-            'If you have a privacy request or want us to update/delete your information, contact us using the details on the Contact page.',
+            'PurnimaCart uses cookies and local storage tokens to keep you logged in, save items in your shopping cart, and preserve settings. You can manage or disable cookies through your browser settings, though some storefront features may stop working.',
           ],
         },
       ]}
@@ -142,43 +154,48 @@ export function TermsConditionsPage() {
   return (
     <PageShell
       eyebrow="Terms & Conditions"
-      title="Terms that apply when you shop with us"
-      intro="These terms explain how orders, pricing, accounts, and store usage work on PurnimaCart. Please review them before placing an order."
+      title="Terms of Service"
+      intro="Please review these terms carefully. By accessing PurnimaCart or placing an order, you agree to comply with and be bound by these Terms and Conditions."
       icon={Scale}
       sections={[
         {
-          title: 'Acceptance of terms',
+          title: '1. Account & Use Eligibility',
           body: [
-            'By using this website, you agree to these terms and to the policies linked in the footer.',
-            'If you do not agree, please stop using the site and do not place an order.',
+            'To place orders on PurnimaCart, you must be eligible to form legally binding contracts under the Indian Contract Act, 1872. You are responsible for keeping your login credentials secure and for all actions taken under your account.',
           ],
         },
         {
-          title: 'Orders, pricing, and availability',
+          title: '2. Product Pricing & Availability',
           body: [
-            'Prices, offers, stock, and product details may change without notice.',
-            'An order is confirmed only when payment is completed or a valid COD order is accepted by the system.',
+            'We strive to display accurate stock levels and pricing. However:',
+            'Price Adjustments: Prices are subject to change without notice.',
+            'Order Acceptance: We reserve the right to cancel any order if a product is out of stock, incorrectly listed, or suspected of fraud.',
           ],
         },
         {
-          title: 'Accounts and communication',
+          title: '3. Billing & Payments',
           body: [
-            'You are responsible for keeping your account details accurate and for reviewing order information before checkout.',
-            'We may contact you by email, phone, or WhatsApp for order-related communication.',
+            'PurnimaCart offers online payments via Razorpay (UPI, Credit/Debit cards, Net Banking) and Cash on Delivery (COD). All orders are re-verified securely before checkout. COD orders are subject to address confirmation by our support team before dispatch.',
           ],
         },
         {
-          title: 'Intellectual property and misuse',
+          title: '4. 5-Minute Delivery Terms',
           body: [
-            'All website content, logos, images, and product presentation belong to PurnimaCart or its partners unless stated otherwise.',
-            'You may not copy, scrape, resell, or misuse the site or its content without permission.',
+            'The 5-Minute Delivery service is available only for select, serviceable pincodes and is subject to the following rules:',
+            'Pincode Verification: You must enter a serviceable pincode to unlock 5-Minute Delivery. If you enter an unserviceable pincode, standard shipping applies.',
+            'Minimum Order Value: 5-Minute Delivery orders require your cart subtotal to meet the minimum amount set by the administrator. Checkout is blocked until this minimum value is met.',
           ],
         },
         {
-          title: 'Limitation of liability',
+          title: '5. Intellectual Property',
           body: [
-            'We work hard to keep the site accurate and available, but we are not responsible for delays or issues outside our reasonable control.',
-            'Our liability is limited to the amount paid for the affected order, where permitted by law.',
+            'All text, graphics, logos, brand elements, button icons, images, and code on this site are the property of PurnimaCart. You may not copy, scrape, modify, or resell any content without express written consent.',
+          ],
+        },
+        {
+          title: '6. Limitation of Liability',
+          body: [
+            'PurnimaCart is not liable for delayed delivery due to force majeure events (unavoidable courier delays, extreme weather, strikes, or transport disruptions). In all cases, our maximum liability is limited strictly to the amount paid by you for the specific order.',
           ],
         },
       ]}
@@ -190,36 +207,43 @@ export function RefundReturnPolicyPage() {
   return (
     <PageShell
       eyebrow="Refund & Return"
-      title="When items can be returned or refunded"
-      intro="This policy explains when a return, replacement, or refund may be available. You can adjust the timelines and eligibility rules later if you want a stricter store policy."
+      title="Cancellation, Return & Refund Policy"
+      intro="We want you to love your purchases. This policy outlines our terms for returns, replacements, and refunds in accordance with e-commerce guidelines."
       icon={RotateCcw}
       sections={[
         {
-          title: 'Eligibility',
+          title: '1. Return Window',
           body: [
-            'Returns are generally accepted for damaged, defective, missing, or wrong items reported soon after delivery.',
-            'Please contact us with your order number and clear photos/video so we can review the issue quickly.',
+            'You may request a return or replacement within 7 days of delivery. Requests made after 7 days will not be accepted.',
           ],
         },
         {
-          title: 'Return window and inspection',
+          title: '2. Valid Return Reasons',
           body: [
-            'A return request should normally be raised within 7 days of delivery unless the product page states a different return window.',
-            'After we receive the returned item, it may be inspected before a refund or replacement is approved.',
+            'Returns and replacements are accepted under the following conditions:',
+          ],
+          bullets: [
+            'The product was delivered in a damaged or broken condition.',
+            'The product is defective or not working correctly.',
+            'Parts, accessories, or items are missing from the package.',
+            'The wrong item (incorrect size, model, or color) was delivered.',
           ],
         },
         {
-          title: 'Non-returnable items',
+          title: '3. Return Conditions',
           body: [
-            'Items that are used, damaged after delivery, missing original packaging, or clearly not in resellable condition may not qualify for a return.',
-            'Certain hygiene-sensitive or custom items may also be non-returnable if the product description says so.',
+            'To qualify for a return or replacement, the product must meet the following guidelines:',
+            'Unused Condition: The product must be unused and in the same condition that you received it.',
+            'Original Packaging: The product must be returned with all original tags, boxes, manuals, and accessories intact.',
+            'Verification: Our delivery agent will inspect the item at the time of pickup.',
           ],
         },
         {
-          title: 'Refund timing',
+          title: '4. Refund Process & Timelines',
           body: [
-            'Approved refunds are usually sent back to the original payment method or handled as directed by support.',
-            'Refund timelines may vary based on your bank, card issuer, or payment method.',
+            'Once we receive and inspect the returned item, we will notify you of the approval or rejection of your refund.',
+            'Approved Refunds: The refund amount will be credited back to your original payment method (via Razorpay) within 5 to 7 business days.',
+            'COD Refunds: For Cash on Delivery orders, we will contact you to request bank account details or a UPI ID to transfer the refund amount directly.',
           ],
         },
       ]}
@@ -231,36 +255,41 @@ export function ShippingPolicyPage() {
   return (
     <PageShell
       eyebrow="Shipping Policy"
-      title="How orders are packed and delivered"
-      intro="This page explains processing times, delivery charges, and what to expect once you place an order."
+      title="Shipping & Delivery Policy"
+      intro="This policy explains our shipping options, processing times, and shipping fees so you know exactly when your order will arrive."
       icon={Truck}
       sections={[
         {
-          title: 'Processing time',
+          title: '1. Shipping Locations',
           body: [
-            'Orders are usually processed after payment confirmation or COD acceptance, depending on the order type.',
-            'Processing times may vary by product availability, order volume, and delivery area.',
+            'PurnimaCart ships products to addresses all across India. We offer standard shipping nationwide, and express 5-Minute Delivery for select local areas in Jalpaiguri, West Bengal.',
           ],
         },
         {
-          title: 'Delivery timelines',
+          title: '2. Shipping Charges',
           body: [
-            'Estimated delivery time depends on your location, the selected products, and courier availability.',
-            'We may show special delivery badges for serviceable fast-delivery areas when available.',
+            'Standard Shipping: A standard shipping fee of ₹49 per item applies at checkout.',
+            'Free Delivery: We offer free standard shipping on orders exceeding ₹999.',
+            '5-Minute Delivery: Express shipping rates apply as shown at checkout.',
           ],
         },
         {
-          title: 'Shipping charges',
+          title: '3. Delivery Timelines',
           body: [
-            'Delivery charges are shown at checkout. Orders above the free-shipping threshold may qualify for free delivery.',
-            'Any special delivery fee or promotion will be shown clearly before you place the order.',
+            'Standard Delivery: Orders are dispatched within 24 to 48 hours and typically arrive within 3 to 7 business days depending on the shipping destination.',
+            '5-Minute Delivery: Orders are packed instantly and dispatched for immediate local delivery within 5 minutes of payment/COD verification.',
           ],
         },
         {
-          title: 'Tracking and delays',
+          title: '4. Order Tracking',
           body: [
-            'Where tracking is available, you can use your order details page to review status updates.',
-            'Delays caused by weather, courier disruption, remote locations, or other outside factors may happen occasionally.',
+            'Once your order is shipped, you can track its progress directly through the "My Orders" and "Order Details" pages in your account dashboard.',
+          ],
+        },
+        {
+          title: '5. Shipping Delays',
+          body: [
+            'While we make every effort to deliver on time, shipping delays can occasionally happen due to weather conditions, transport strikes, festivals, or courier route issues. We appreciate your patience during such delays.',
           ],
         },
       ]}
@@ -271,29 +300,29 @@ export function ShippingPolicyPage() {
 export function CancellationPolicyPage() {
   return (
     <PageShell
-      eyebrow="Cancellation Policy"
-      title="How and when orders can be cancelled"
-      intro="If you need to cancel an order, the best time is before dispatch. Once a parcel is packed or shipped, cancellation may no longer be possible."
+      eyebrow="Cancellation"
+      title="Cancellation Policy"
+      intro="If you change your mind, you can cancel your order before it is prepared or shipped out."
       icon={Ban}
       sections={[
         {
-          title: 'Before dispatch',
+          title: '1. Cancellation Window',
           body: [
-            'Orders can usually be cancelled before they are packed or handed to the delivery partner.',
-            'If cancellation is approved, any eligible refund will follow the original payment method or support instructions.',
+            'Standard Orders: You can cancel your order at any time before it enters the "Dispatched" state by contacting customer support.',
+            '5-Minute Delivery Orders: Because 5-minute orders are dispatched immediately, cancellation requests must be raised within 1 minute of placing the order.',
           ],
         },
         {
-          title: 'After dispatch',
+          title: '2. Cancellation Process',
           body: [
-            'Once an order has been dispatched, cancellation may not be possible.',
-            'If the package is already in transit, you may need to wait for delivery and then use the return policy if applicable.',
+            'To cancel an order, go to the "Order Details" page and click the "Cancel Order" button if available, or contact our customer support via phone or WhatsApp at +91 93329 61712 immediately.',
           ],
         },
         {
-          title: 'Support contact',
+          title: '3. Refund on Cancellation',
           body: [
-            'If you need help with cancellation, contact us with your order number as soon as possible.',
+            'Prepaid Orders: If you cancel a prepaid order, the transaction will be refunded in full back to your original payment method (via Razorpay) within 5 to 7 business days.',
+            'COD Orders: No cancellation fees apply for COD orders cancelled before dispatch. If a user repeatedly cancels COD orders at the doorstep, we reserve the right to disable COD for that user account.',
           ],
         },
       ]}

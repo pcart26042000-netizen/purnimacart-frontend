@@ -181,7 +181,27 @@ export interface StoreSettings {
   showPromoBanner?: boolean;
   fiveMinDeliveryAvailable?: boolean;
   fiveMinDeliveryPincode?: string;
+  dealShowcaseTitle?: string;
+  dealItem1Image?: string;
+  dealItem1Badge?: string;
+  dealItem1Title?: string;
+  dealItem1Link?: string;
+  dealItem2Image?: string;
+  dealItem2Badge?: string;
+  dealItem2Title?: string;
+  dealItem2Link?: string;
+  dealItem3Image?: string;
+  dealItem3Badge?: string;
+  dealItem3Title?: string;
+  dealItem3Link?: string;
+  dealItem4Image?: string;
+  dealItem4Badge?: string;
+  dealItem4Title?: string;
+  dealItem4Link?: string;
+  singleBannerImage?: string;
+  singleBannerCategory?: string;
+  singleBannerTitle?: string;
+  singleBannerSubtitle?: string;
+  singleBannerCtaText?: string;
+  fiveMinMinOrderValue?: number;
 }
-
-
-

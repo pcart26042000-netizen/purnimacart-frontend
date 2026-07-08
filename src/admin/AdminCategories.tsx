@@ -205,7 +205,10 @@ export default function AdminCategories({ onToast }: AdminCategoriesProps) {
               />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-[#291715] truncate">{c.name}</p>
-                <p className="text-[10px] text-[#5e3f3b]/50">{productCounts[c.slug] || 0} products</p>
+                <p className="text-[10px] font-mono text-primary font-bold select-all mt-0.5" title="Category Link ID (slug)">
+                  ID: {c.slug}
+                </p>
+                <p className="text-[10px] text-[#5e3f3b]/50 mt-0.5">{productCounts[c.slug] || 0} products</p>
                 <span className={`inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${c.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-[#5e3f3b]/10 text-[#5e3f3b]/60'}`}>
                   {c.isActive ? 'Active' : 'Hidden'}
                 </span>

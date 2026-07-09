@@ -175,7 +175,7 @@ export async function placeCodOrder(items: CartLineInput[], addressId: string, c
       transaction.set(orderRef, {
         userId: authUser.uid,
         email: authUser.email || '',
-        customerName: authUser.displayName || address.name,
+        customerName: address.fullName || authUser.displayName || 'Guest Customer',
         items: orderItems,
         shippingAddress: address,
         subtotal,

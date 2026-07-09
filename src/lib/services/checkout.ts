@@ -195,7 +195,7 @@ export async function placeCodOrder(items: CartLineInput[], addressId: string, c
         email: authUser.email || '',
         customerName: address.fullName || authUser.displayName || 'Guest Customer',
         items: orderItems,
-        shippingAddress: address,
+        addressSnapshot: address,
         subtotal,
         deliveryCharge,
         discount,

@@ -157,7 +157,7 @@ export async function placeCodOrder(items: CartLineInput[], addressId: string, c
         orderItems.push({
           productId: item.productId,
           name: prodData.name,
-          image: prodData.image,
+          image: (prodData.images && prodData.images.length) ? prodData.images[0] : '',
           price: price,
           qty: item.qty,
           selectedColor: item.variant?.color || 'Classic',

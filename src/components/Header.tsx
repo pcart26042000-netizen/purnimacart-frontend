@@ -118,14 +118,13 @@ export default function Header({
             className="flex items-center gap-2 hover:opacity-95 cursor-pointer"
             id="brand-logo"
           >
-            <img src={logoImg} alt="PurnimaCart" className="h-8 w-auto rounded-sm object-contain border border-white/20" />
+            <img src={logoImg} alt="PCart" className="h-8 w-auto rounded-sm object-contain border border-white/20" />
             <div className="flex flex-col items-start leading-none shrink-0">
               <span className="font-sans text-base md:text-lg font-black italic tracking-tight text-white flex items-center">
-                Purnima<span className="text-white">Cart</span>
+                P<span className="text-white">Cart</span>
               </span>
               <span className="text-[9px] font-bold italic text-white/90 flex items-center gap-0.5 mt-0.5 self-end">
                 Explore <span className="text-white font-black">Plus</span>
-                <span className="text-white text-[8px] animate-pulse">â˜…</span>
               </span>
             </div>
           </button>

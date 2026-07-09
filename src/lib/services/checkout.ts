@@ -4,6 +4,19 @@ import type { CartItem } from '../../types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
+function cleanObject<T extends object>(obj: T): T {
+  const clean: any = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (val === undefined) continue;
+    if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date) && !(val.constructor && val.constructor.name === 'Timestamp')) {
+      clean[key] = cleanObject(val);
+    } else {
+      clean[key] = val;
+    }
+  }
+  return clean as T;
+}
+
 export interface CartLineInput {
   productId: string;
   qty: number;
@@ -172,7 +185,7 @@ export async function placeCodOrder(items: CartLineInput[], addressId: string, c
       }
       
       const orderRef = doc(db, 'orders', orderId);
-      transaction.set(orderRef, {
+      transaction.set(orderRef, cleanObject({
         userId: authUser.uid,
         email: authUser.email || '',
         customerName: address.fullName || authUser.displayName || 'Guest Customer',
@@ -187,7 +200,7 @@ export async function placeCodOrder(items: CartLineInput[], addressId: string, c
         orderStatus: 'pending',
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-      });
+      }));
     });
     
     return { orderId };

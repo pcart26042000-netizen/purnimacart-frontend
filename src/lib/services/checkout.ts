@@ -180,7 +180,7 @@ export async function placeCodOrder(items: CartLineInput[], addressId: string, c
       const settings = settingsSnap.exists() ? settingsSnap.data() : { deliveryCharge: 49, freeDeliveryThreshold: 999 };
       
       const totalQty = items.reduce((acc, item) => acc + item.qty, 0);
-      const deliveryCharge = subtotal >= (settings.freeDeliveryThreshold || 999) ? 0 : (settings.deliveryCharge || 49) * totalQty;
+      const deliveryCharge = subtotal >= (settings.freeDeliveryThreshold !== undefined && settings.freeDeliveryThreshold !== null ? settings.freeDeliveryThreshold : 999) ? 0 : (settings.deliveryCharge !== undefined && settings.deliveryCharge !== null ? settings.deliveryCharge : 49) * totalQty;
       const total = Math.max(0, subtotal + deliveryCharge - discount);
       
       for (const prod of productSnaps) {

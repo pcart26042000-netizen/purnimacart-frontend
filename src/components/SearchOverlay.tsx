@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Search, X, ArrowLeft, Clock, TrendingUp, PackageSearch, ArrowUpRight } from 'lucide-react';
+import { Search, X, ArrowLeft, Clock, TrendingUp, PackageSearch, ArrowUpRight, Mic } from 'lucide-react';
 import { TRENDING_SEARCHES } from '../data';
 import type { Product, Category } from '../types';
 
@@ -22,6 +22,7 @@ function saveRecent(list: string[]) {
 interface SearchOverlayProps {
   isOpen: boolean;
   initialQuery?: string;
+  initialVoiceSearch?: boolean;
   products: Product[];
   categories: Category[];
   onClose: () => void;
@@ -32,6 +33,7 @@ interface SearchOverlayProps {
 export default function SearchOverlay({
   isOpen,
   initialQuery = '',
+  initialVoiceSearch = false,
   products,
   categories,
   onClose,
@@ -41,21 +43,57 @@ export default function SearchOverlay({
   const [query, setQuery] = useState(initialQuery);
   const [recent, setRecent] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isListening, setIsListening] = useState(false);
+
+  const startVoiceSearch = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Voice search is not supported in your browser.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const speechToText = event.results[0][0].transcript;
+      setQuery(speechToText);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   useEffect(() => {
     if (isOpen) {
       setQuery(initialQuery);
       setRecent(loadRecent());
-      // Focus after the mount/animation frame so mobile keyboards reliably open
       requestAnimationFrame(() => inputRef.current?.focus());
       document.body.style.overflow = 'hidden';
+      if (initialVoiceSearch) {
+        startVoiceSearch();
+      }
     } else {
       document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen, initialQuery]);
+  }, [isOpen, initialQuery, initialVoiceSearch]);
 
   if (!isOpen) return null;
 
@@ -138,10 +176,10 @@ export default function SearchOverlay({
             inputMode="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search products, brands and categories"
-            className="w-full h-12 bg-[#fff0ee] rounded-2xl pl-11 pr-11 text-sm text-[#291715] placeholder:text-[#5e3f3b]/50 outline-none focus:ring-2 focus:ring-primary/25 transition-all"
+            placeholder={isListening ? "Listening... Speak now!" : "Search products, brands and categories"}
+            className={`w-full h-12 bg-[#fff0ee] rounded-2xl pl-11 pr-11 text-sm text-[#291715] placeholder:text-[#5e3f3b]/50 outline-none focus:ring-2 focus:ring-primary/25 transition-all ${isListening ? 'ring-2 ring-primary/40' : ''}`}
           />
-          {query && (
+          {query ? (
             <button
               type="button"
               onClick={() => {
@@ -152,6 +190,15 @@ export default function SearchOverlay({
               className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-[#5e3f3b]/50 hover:bg-white hover:text-primary transition-colors cursor-pointer"
             >
               <X size={15} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={startVoiceSearch}
+              aria-label="Voice search"
+              className={`absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isListening ? 'bg-primary text-white animate-pulse' : 'text-[#5e3f3b]/50 hover:bg-[#fff0ee]'}`}
+            >
+              <Mic size={15} />
             </button>
           )}
         </div>

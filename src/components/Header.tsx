@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Search, Bell, ShoppingCart, User, Heart, LayoutDashboard, Package, LogOut, MapPin, Mic } from 'lucide-react';
 import { PageType, Product, Category } from '../types';
 import SearchOverlay from './SearchOverlay';
@@ -55,6 +55,7 @@ export default function Header({
   onFiveMinClick,
 }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [startVoiceSearchOnOpen, setStartVoiceSearchOnOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const { user, isAdmin, signInWithGoogle, signOut } = useAuth();
@@ -307,16 +308,30 @@ export default function Header({
 
         {/* Row 2: Always-visible mobile search bar with Mic icon */}
         <div className="md:hidden px-4 pb-3 flex items-center gap-2">
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="flex-1 h-10 flex items-center justify-between bg-white text-gray-400 rounded-[20px] px-4 text-left text-xs active:scale-[0.99] transition-all cursor-pointer shadow-sm border border-transparent focus:outline-none"
+          <div
+            className="flex-1 h-10 flex items-center justify-between bg-white text-gray-400 rounded-[20px] px-4 text-left text-xs active:scale-[0.99] transition-all shadow-sm border border-transparent"
           >
-            <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setStartVoiceSearchOnOpen(false);
+                setSearchOpen(true);
+              }}
+              className="flex-grow flex items-center gap-3 text-left focus:outline-none h-full cursor-pointer"
+            >
               <Search size={16} className="text-gray-500 shrink-0" />
               <span className="truncate text-gray-500 text-[10px] sm:text-xs">Search products, categories...</span>
-            </div>
-            <Mic size={16} className="text-gray-500 shrink-0" />
-          </button>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setStartVoiceSearchOnOpen(true);
+                setSearchOpen(true);
+              }}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer flex items-center justify-center"
+            >
+              <Mic size={16} className="text-gray-500 shrink-0" />
+            </button>
+          </div>
 
           <button
             type="button"
@@ -354,6 +369,7 @@ export default function Header({
 
       <SearchOverlay
         isOpen={searchOpen}
+        initialVoiceSearch={startVoiceSearchOnOpen}
         products={products}
         categories={categories}
         onClose={() => setSearchOpen(false)}

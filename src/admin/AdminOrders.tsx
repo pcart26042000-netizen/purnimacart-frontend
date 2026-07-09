@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search, Eye, X, MapPin, Package, CreditCard } from 'lucide-react';
 import type { FirestoreOrder, OrderStatus } from '../types/firestore';
 import { useAdminOrders } from './hooks/useAdminOrders';
@@ -139,12 +139,19 @@ function OrderDetailModal({
               <h4 className="text-xs font-bold uppercase tracking-wide text-[#5e3f3b]/50 mb-2 flex items-center gap-1.5">
                 <MapPin size={13} /> Delivery Address
               </h4>
-              <p className="text-xs font-semibold text-[#291715]">{order.addressSnapshot.fullName}</p>
-              <p className="text-[11px] text-[#5e3f3b] leading-relaxed mt-0.5">
-                {order.addressSnapshot.line1}{order.addressSnapshot.line2 ? `, ${order.addressSnapshot.line2}` : ''}<br />
-                {order.addressSnapshot.city}, {order.addressSnapshot.state} - {order.addressSnapshot.pincode}
-              </p>
-              <p className="text-[11px] text-[#5e3f3b]/70 mt-1">Phone: {order.addressSnapshot.phone}</p>
+              {(() => {
+                const addr = order.addressSnapshot || (order as any).shippingAddress || {};
+                return (
+                  <>
+                    <p className="text-xs font-semibold text-[#291715]">{addr.fullName || 'N/A'}</p>
+                    <p className="text-[11px] text-[#5e3f3b] leading-relaxed mt-0.5">
+                      {addr.line1 || ''}{addr.line2 ? `, ${addr.line2}` : ''}<br />
+                      {addr.city || ''}, {addr.state || ''} - {addr.pincode || ''}
+                    </p>
+                    <p className="text-[11px] text-[#5e3f3b]/70 mt-1">Phone: {addr.phone || 'N/A'}</p>
+                  </>
+                );
+              })()}
             </div>
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wide text-[#5e3f3b]/50 mb-2 flex items-center gap-1.5">
@@ -233,7 +240,7 @@ export default function AdminOrders({ onToast }: AdminOrdersProps) {
     if (query.trim()) {
       const q = query.trim().toLowerCase();
       result = result.filter(
-        (o) => o.id.toLowerCase().includes(q) || o.addressSnapshot?.fullName?.toLowerCase().includes(q)
+        (o) => o.id.toLowerCase().includes(q) || (o.addressSnapshot?.fullName || (o as any).shippingAddress?.fullName)?.toLowerCase().includes(q)
       );
     }
     return result;
@@ -295,9 +302,9 @@ export default function AdminOrders({ onToast }: AdminOrdersProps) {
                 {paged.map((o) => (
                   <tr key={o.id} className="hover:bg-[#fff8f7] transition-colors">
                     <td className="px-5 py-3.5 font-mono text-xs font-bold text-[#291715]">{o.id.slice(0, 10)}</td>
-                    <td className="px-5 py-3.5 text-[#291715] font-medium">{o.addressSnapshot?.fullName || 'â€”'}</td>
+                    <td className="px-5 py-3.5 text-[#291715] font-medium">{o.addressSnapshot?.fullName || (o as any).shippingAddress?.fullName || '—'}</td>
                     <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs">
-                      {o.createdAt?.toDate?.() ? o.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'â€”'}
+                      {o.createdAt?.toDate?.() ? o.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                     </td>
                     <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs">{o.items.reduce((a, i) => a + i.qty, 0)}</td>
                     <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs">{o.paymentMethod === 'cod' ? 'COD' : 'Razorpay'}</td>

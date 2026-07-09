@@ -64,7 +64,7 @@ export default function OrderDetailsPage({ orderId, onBack }: OrderDetailsPagePr
 
   const isCancelled = order.orderStatus === 'cancelled';
   const currentStepIndex = TIMELINE_STEPS.indexOf(order.orderStatus as OrderStatus);
-  const address = order.addressSnapshot;
+  const address = order.addressSnapshot || (order as any).shippingAddress || {};
   const createdDate = order.createdAt?.toDate?.()
     ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
     : '—';

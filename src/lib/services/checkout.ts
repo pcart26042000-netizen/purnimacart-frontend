@@ -5,14 +5,19 @@ import type { CartItem } from '../../types';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 function cleanObject<T extends object>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => cleanObject(item)) as any;
+  }
+  if (obj instanceof Date || typeof (obj as any).toMillis === 'function' || typeof (obj as any).isEqual === 'function') {
+    return obj;
+  }
   const clean: any = {};
   for (const [key, val] of Object.entries(obj)) {
     if (val === undefined) continue;
-    if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date) && !(val.constructor && val.constructor.name === 'Timestamp')) {
-      clean[key] = cleanObject(val);
-    } else {
-      clean[key] = val;
-    }
+    clean[key] = cleanObject(val as any);
   }
   return clean as T;
 }

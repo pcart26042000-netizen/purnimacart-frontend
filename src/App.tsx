@@ -488,6 +488,15 @@ export default function App() {
         selectedCategory={selectedCategory}
         isFiveMinActive={isFiveMinActive}
         onFiveMinClick={handleFiveMinClick}
+        onAddToCart={(product, e) => {
+          e?.stopPropagation();
+          handleAddToCart(product);
+        }}
+        onToggleWishlist={(product, e) => {
+          e?.stopPropagation();
+          handleToggleWishlist(product);
+        }}
+        isWishlisted={isWishlisted}
       />
 
       {/* Cart Drawer Component */}

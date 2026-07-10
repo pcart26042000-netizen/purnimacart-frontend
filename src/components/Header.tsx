@@ -38,6 +38,9 @@ interface HeaderProps {
   selectedCategory: string;
   isFiveMinActive: boolean;
   onFiveMinClick: () => void;
+  onAddToCart: (product: Product, e: React.MouseEvent) => void;
+  onToggleWishlist: (product: Product, e: React.MouseEvent) => void;
+  isWishlisted: (id: string) => boolean;
 }
 
 export default function Header({
@@ -53,6 +56,9 @@ export default function Header({
   selectedCategory,
   isFiveMinActive,
   onFiveMinClick,
+  onAddToCart,
+  onToggleWishlist,
+  isWishlisted,
 }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [startVoiceSearchOnOpen, setStartVoiceSearchOnOpen] = useState(false);
@@ -374,6 +380,10 @@ export default function Header({
         onClose={() => setSearchOpen(false)}
         onSelectProduct={handleProductSelect}
         onSelectCategory={handleCategorySelect}
+        onAddToCart={onAddToCart}
+        onToggleWishlist={onToggleWishlist}
+        isWishlisted={isWishlisted}
+        isFiveMinActive={isFiveMinActive}
       />
     </>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Search, X, ArrowLeft, Clock, TrendingUp, PackageSearch, ArrowUpRight, Mic } from 'lucide-react';
 import { TRENDING_SEARCHES } from '../data';
 import type { Product, Category } from '../types';
+import ProductCard from './ProductCard';
 
 const RECENT_KEY = 'purnimacart_recent_searches';
 const MAX_RECENT = 8;
@@ -28,6 +29,10 @@ interface SearchOverlayProps {
   onClose: () => void;
   onSelectProduct: (id: string) => void;
   onSelectCategory: (categoryId: string) => void;
+  onAddToCart: (product: Product, e: React.MouseEvent) => void;
+  onToggleWishlist: (product: Product, e: React.MouseEvent) => void;
+  isWishlisted: (id: string) => boolean;
+  isFiveMinActive?: boolean;
 }
 
 export default function SearchOverlay({
@@ -39,6 +44,10 @@ export default function SearchOverlay({
   onClose,
   onSelectProduct,
   onSelectCategory,
+  onAddToCart,
+  onToggleWishlist,
+  isWishlisted,
+  isFiveMinActive,
 }: SearchOverlayProps) {
   const [query, setQuery] = useState(initialQuery);
   const [recent, setRecent] = useState<string[]>([]);
@@ -304,37 +313,21 @@ export default function SearchOverlay({
               </section>
             )}
 
-            <section className="space-y-2">
+            <section className="space-y-4">
               <h3 className="text-xs font-bold text-[#5e3f3b]/60 uppercase tracking-wider px-1">
                 Products ({liveResults.length})
               </h3>
-              <div className="flex flex-col divide-y divide-[#e8bcb7]/15 bg-white rounded-2xl border border-[#e8bcb7]/20 overflow-hidden">
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {liveResults.slice(0, 20).map((product) => (
-                  <button
+                  <ProductCard
                     key={product.id}
-                    onClick={() => handleProductPick(product.id)}
-                    className="flex items-center gap-4 p-3.5 hover:bg-[#fff0ee] transition-colors text-left cursor-pointer"
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-14 h-14 rounded-xl object-cover bg-[#fff0ee] shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#291715] truncate">{product.name}</p>
-                      <p className="text-[11px] text-[#5e3f3b]/60 uppercase tracking-wider mt-0.5">
-                        {product.category}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-primary">₹{product.price.toLocaleString()}</p>
-                      {product.originalPrice && (
-                        <p className="text-[11px] text-[#5e3f3b]/50 line-through">
-                          ₹{product.originalPrice.toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-                  </button>
+                    product={product}
+                    onProductClick={handleProductPick}
+                    onAddToCart={onAddToCart}
+                    isWishlisted={isWishlisted(product.id)}
+                    onToggleWishlist={onToggleWishlist}
+                    isFiveMinActive={isFiveMinActive}
+                  />
                 ))}
               </div>
             </section>

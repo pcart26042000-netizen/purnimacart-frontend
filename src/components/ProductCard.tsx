@@ -40,17 +40,8 @@ export default function ProductCard({
   onToggleWishlist,
   isFiveMinActive,
 }: ProductCardProps) {
-  const [activeColor, setActiveColor] = React.useState<string | undefined>(() => {
-    return product.variants && product.variants.length > 0 ? product.variants[0].color : undefined;
-  });
-
-  const activeVariant = React.useMemo(() => {
-    if (!activeColor || !product.variants) return null;
-    return product.variants.find((v) => v.color === activeColor);
-  }, [activeColor, product.variants]);
-
-  const displayImage = activeVariant?.image || product.image;
-  const activePrice = activeVariant?.price !== undefined ? activeVariant.price : product.price;
+  const displayImage = product.image;
+  const activePrice = product.price;
 
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - activePrice) / product.originalPrice) * 100)
@@ -99,7 +90,7 @@ export default function ProductCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onAddToCart(product, activeColor, activePrice, e);
+            onAddToCart(product, undefined, undefined, e);
           }}
           className="absolute bottom-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-hover active:scale-95 transition-all duration-300 shadow-md cursor-pointer"
           title="Add to Cart"
@@ -137,34 +128,7 @@ export default function ProductCard({
           </span>
         </div>
 
-        {/* Color Swatch Dots Selector */}
-        {product.variants && product.variants.length > 0 && (
-          <div className="flex gap-1.5 items-center my-1.5 flex-wrap">
-            {product.variants.map((v) => {
-              if (!v.color) return null;
-              const normalizedColor = v.color.toLowerCase().trim();
-              const colorClass = COLOR_MAP[normalizedColor] || 'bg-gray-200 text-[8px] flex items-center justify-center font-bold text-gray-600 border border-gray-300';
-              const isSelected = activeColor === v.color;
 
-              return (
-                <button
-                  key={v.color}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveColor(v.color);
-                  }}
-                  className={`w-4 h-4 rounded-full transition-all cursor-pointer ${colorClass} ${
-                    isSelected ? 'ring-2 ring-primary ring-offset-1 scale-110' : 'hover:scale-105'
-                  }`}
-                  title={v.color}
-                >
-                  {!COLOR_MAP[normalizedColor] && v.color ? v.color[0].toUpperCase() : ''}
-                </button>
-              );
-            })}
-          </div>
-        )}
 
         {/* Badges/Offers */}
         <div className="flex flex-wrap gap-1 items-center pt-0.5">

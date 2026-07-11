@@ -105,17 +105,7 @@ export default function ProductDetail({
     }
   };
 
-  const variantImages = (product.variants || [])
-    .map((v) => v.image)
-    .filter(Boolean) as string[];
-
-  const galleryImages = Array.from(
-    new Set([
-      ...(product.images && product.images.length > 0 ? product.images : [product.image]),
-      ...variantImages,
-    ])
-  );
-  
+  const galleryImages = product.images && product.images.length > 0 ? product.images : [product.image];
   const [activeImageIndex, setActiveImageIndex] = useState(-1);
 
   useEffect(() => {
@@ -125,50 +115,25 @@ export default function ProductDetail({
   const activeImage = activeImageIndex >= 0 ? galleryImages[activeImageIndex] : (activeVariant?.image || galleryImages[0]);
   const activePrice = activeVariant?.price !== undefined ? activeVariant.price : product.price;
 
-  const getActiveIndex = () => {
-    if (activeImageIndex >= 0) return activeImageIndex;
-    const currentImg = activeVariant?.image || galleryImages[0];
-    const idx = galleryImages.indexOf(currentImg);
-    return idx >= 0 ? idx : 0;
-  };
-
-  const selectImage = (index: number) => {
-    setActiveImageIndex(index);
-    const img = galleryImages[index];
-    const match = (product.variants || []).find((v) => v.image === img);
-    if (match && match.color) {
-      setSelectedColor(match.color);
-    }
-  };
-
   const goPrevImage = () => {
-    const idx = getActiveIndex();
-    const prevIdx = idx === 0 ? galleryImages.length - 1 : idx - 1;
-    selectImage(prevIdx);
+    const fallbackLen = galleryImages.length;
+    setActiveImageIndex((idx) => {
+      const current = idx >= 0 ? idx : 0;
+      return current === 0 ? fallbackLen - 1 : current - 1;
+    });
   };
 
   const goNextImage = () => {
-    const idx = getActiveIndex();
-    const nextIdx = idx >= galleryImages.length - 1 ? 0 : idx + 1;
-    selectImage(nextIdx);
+    const fallbackLen = galleryImages.length;
+    setActiveImageIndex((idx) => {
+      const current = idx >= 0 ? idx : 0;
+      return current >= fallbackLen - 1 ? 0 : current + 1;
+    });
   };
 
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - activePrice) / product.originalPrice) * 100)
     : 0;
-
-  const currentStock = activeVariant?.stock !== undefined ? activeVariant.stock : (product as any).stock;
-  const isOutOfStock = currentStock <= 0;
-
-  console.log('ProductDetail Debug:', {
-    id: product.id,
-    name: product.name,
-    variants: product.variants,
-    variantImages,
-    galleryImages,
-    activeImageIndex,
-    activeImage,
-  });
 
   return (
     <div className="py-3 md:py-6 px-0 max-w-7xl mx-auto">
@@ -215,147 +180,26 @@ export default function ProductDetail({
 
             {galleryImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-                {galleryImages.map((image, index) => {
-                  const isActive = activeImageIndex >= 0 ? activeImageIndex === index : (activeImage === image);
-                  return (
-                    <button
-                      type="button"
-                      key={image + index}
-                      onClick={() => selectImage(index)}
-                      className={`w-16 h-16 md:w-18 md:h-18 rounded-xl overflow-hidden border transition-all shrink-0 ${
-                        isActive
-                          ? 'border-primary ring-2 ring-primary/20'
-                          : 'border-[#e8bcb7]/20 hover:border-primary/60'
+                {galleryImages.map((image, index) => (
+                  <button
+                    type="button"
+                    key={image + index}
+                    onClick={() => setActiveImageIndex(index)}
+                    className={`w-16 h-16 md:w-18 md:h-18 rounded-xl overflow-hidden border transition-all shrink-0 ${activeImageIndex === index
+                        ? 'border-primary ring-2 ring-primary/20'
+                        : 'border-[#e8bcb7]/20 hover:border-primary/60'
                       }`}
-                      aria-label={`View image ${index + 1}`}
-                    >
-                      <img src={image} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  );
-                })}
+                    aria-label={`View image ${index + 1}`}
+                  >
+                    <img src={image} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
               </div>
             )}
-          </div>
 
-          {/* Flipkart Signature Buy/Add Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={handleAddToCartClick}
-              id="add-to-cart-detail-btn"
-              disabled={isOutOfStock}
-              className={`flex-1 text-white py-4 px-4 rounded-sm font-bold text-xs uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
-                isOutOfStock ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-[#ff9f00] hover:bg-[#e08c00]'
-              }`}
-            >
-              <ShoppingCart size={16} />
-              {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-            </button>
-            <button
-              onClick={() => {
-                if (isOutOfStock) return;
-                if (onBuyNow) {
-                  onBuyNow(
-                    product,
-                    quantity,
-                    hasColorVariants ? selectedColor : undefined,
-                    hasSizeVariants ? selectedSize : undefined,
-                    activeVariant?.price,
-                    activeVariant?.image
-                  );
-                } else {
-                  onAddToCart(
-                    product,
-                    quantity,
-                    hasColorVariants ? selectedColor : undefined,
-                    hasSizeVariants ? selectedSize : undefined,
-                    activeVariant?.price,
-                    activeVariant?.image
-                  );
-                }
-              }}
-              disabled={isOutOfStock}
-              className={`flex-1 text-white py-4 px-4 rounded-sm font-bold text-xs uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
-                isOutOfStock ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none' : 'bg-[#fb641b] hover:bg-[#e0540d]'
-              }`}
-            >
-              Buy Now
-            </button>
-          </div>
-        </div>
-
-        {/* Right Column: Details & Customizers */}
-        <div className="lg:col-span-7 space-y-6 lg:pl-4 px-0 md:px-0">
-          <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {product.category} Collection
-            </span>
-            <div className="flex items-center gap-2.5 flex-wrap mt-1">
-              <h1 className="font-sans font-bold text-lg md:text-2xl text-gray-900 leading-snug">
-                {product.name}
-              </h1>
-              <div className="mt-2">
-                <FiveMinDeliveryBadge product={product} isActive={isFiveMinActive} variant="detail" />
-              </div>
-              </div>
-
-            {/* Rating Stars Summary */}
-            <div className="flex items-center gap-2 mt-2">
-              <span className="bg-[#388e3c] text-white text-xs font-bold px-2 py-0.5 rounded-sm flex items-center gap-0.5">
-                {product.rating} <span className="text-[8px]">★</span>
-              </span>
-              <span className="text-xs text-gray-400 font-bold">
-                ({reviews.length} Ratings & {reviews.length} Reviews)
-              </span>
-            </div>
-          </div>
-
-          {/* Pricing Row */}
-          <div className="flex items-baseline gap-3 p-4 bg-gray-50 border border-gray-200 rounded-sm">
-            <span className="text-2xl font-black text-gray-900">
-              ₹{activePrice.toLocaleString('en-IN')}
-            </span>
-            {product.originalPrice && (
-              <>
-                <span className="text-gray-400 line-through text-xs font-semibold">
-                  ₹{product.originalPrice.toLocaleString('en-IN')}
-                </span>
-                <span className="text-xs font-bold text-[#388e3c] bg-green-50 px-2 py-0.5 rounded-sm border border-green-100">
-                  {discountPercent}% Off
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Stock Status Indicator */}
-          <div className="text-xs">
-            {isOutOfStock ? (
-              <span className="text-red-600 font-bold bg-red-50 border border-red-100 rounded px-2.5 py-1 inline-block">
-                Out of Stock
-              </span>
-            ) : currentStock <= 5 ? (
-              <span className="text-amber-600 font-bold bg-amber-50 border border-amber-100 rounded px-2.5 py-1 inline-block animate-pulse">
-                Only {currentStock} left in stock!
-              </span>
-            ) : (
-              <span className="text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 rounded px-2.5 py-1 inline-block">
-                In Stock ({currentStock} available)
-              </span>
-            )}
-          </div>
-
-          {/* Description */}
-          <div className="space-y-1">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Product Description</h4>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              {product.description}
-            </p>
-          </div>
-
-          {/* Customizations selectors */}
-          <div className="space-y-4 pt-4 border-t border-gray-150">
-            {/* Color Selector */}
+            {/* Color Selector (Rendered below main images gallery on both desktop & mobile) */}
             {hasColorVariants && product.variants && product.variants.length > 0 && (
-              <div>
+              <div className="pt-3 pb-1 border-t border-gray-100 mt-2">
                 <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-2">
                   Selected Color: <span className="text-primary font-black">{selectedColor}</span>
                 </span>
@@ -389,6 +233,101 @@ export default function ProductDetail({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Flipkart Signature Buy/Add Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={handleAddToCartClick}
+              id="add-to-cart-detail-btn"
+              className="flex-1 bg-[#ff9f00] hover:bg-[#e08c00] text-white py-4 px-4 rounded-sm font-bold text-xs uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+            >
+              <ShoppingCart size={16} />
+              Add to Cart
+            </button>
+            <button
+              onClick={() => {
+                if (onBuyNow) {
+                  onBuyNow(
+                    product,
+                    quantity,
+                    hasColorVariants ? selectedColor : undefined,
+                    hasSizeVariants ? selectedSize : undefined,
+                    activeVariant?.price,
+                    activeVariant?.image
+                  );
+                } else {
+                  onAddToCart(
+                    product,
+                    quantity,
+                    hasColorVariants ? selectedColor : undefined,
+                    hasSizeVariants ? selectedSize : undefined,
+                    activeVariant?.price,
+                    activeVariant?.image
+                  );
+                }
+              }}
+              className="flex-1 bg-[#fb641b] hover:bg-[#e0540d] text-white py-4 px-4 rounded-sm font-bold text-xs uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+            >
+              Buy Now
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Details & Customizers */}
+        <div className="lg:col-span-7 space-y-6 lg:pl-4 px-0 md:px-0">
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              {product.category} Collection
+            </span>
+            <div className="flex items-center gap-2.5 flex-wrap mt-1">
+              <h1 className="font-sans font-bold text-lg md:text-2xl text-gray-900 leading-snug">
+                {product.name}
+              </h1>
+              <div className="mt-2">
+                <FiveMinDeliveryBadge product={product} isActive={isFiveMinActive} variant="detail" />
+              </div>
+            </div>
+
+            {/* Rating Stars Summary */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className="bg-[#388e3c] text-white text-xs font-bold px-2 py-0.5 rounded-sm flex items-center gap-0.5">
+                {product.rating} <span className="text-[8px]">★</span>
+              </span>
+              <span className="text-xs text-gray-400 font-bold">
+                ({reviews.length} Ratings & {reviews.length} Reviews)
+              </span>
+            </div>
+          </div>
+
+          {/* Pricing Row */}
+          <div className="flex items-baseline gap-3 p-4 bg-gray-50 border border-gray-200 rounded-sm">
+            <span className="text-2xl font-black text-gray-900">
+              ₹{activePrice.toLocaleString('en-IN')}
+            </span>
+            {product.originalPrice && (
+              <>
+                <span className="text-gray-400 line-through text-xs font-semibold">
+                  ₹{product.originalPrice.toLocaleString('en-IN')}
+                </span>
+                <span className="text-xs font-bold text-[#388e3c] bg-green-50 px-2 py-0.5 rounded-sm border border-green-100">
+                  {discountPercent}% Off
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1">
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Product Description</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              {product.description}
+            </p>
+          </div>
+
+          {/* Customizations selectors */}
+          <div className="space-y-4 pt-4 border-t border-gray-150">
+
 
             {/* Size Selector */}
             {hasSizeVariants && sizes.length > 0 && (
@@ -402,8 +341,8 @@ export default function ProductDetail({
                       key={size}
                       onClick={() => setSelectedSize(size)}
                       className={`px-3 py-1.5 text-xs font-bold rounded-sm border transition-all cursor-pointer ${selectedSize === size
-                          ? 'border-primary bg-primary text-white shadow-sm'
-                          : 'border-gray-200 bg-white text-gray-600 hover:border-primary'
+                        ? 'border-primary bg-primary text-white shadow-sm'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-primary'
                         }`}
                     >
                       {size}

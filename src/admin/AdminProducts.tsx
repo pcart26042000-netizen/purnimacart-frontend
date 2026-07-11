@@ -107,7 +107,7 @@ function ProductFormModal({
 
   const removeImage = (url: string) => set('images', form.images.filter((i) => i !== url));
 
-  const addVariant = () => set('variants', [...form.variants, { color: '', image: '', price: undefined, stock: 0 }]);
+  const addVariant = () => set('variants', [...form.variants, { color: '', image: '', price: undefined, stock: Number(form.stock) || 1 }]);
   const updateVariant = (idx: number, patch: Partial<ProductVariant>) =>
     set('variants', form.variants.map((v, i) => (i === idx ? { ...v, ...patch } : v)));
   const removeVariant = (idx: number) => set('variants', form.variants.filter((_, i) => i !== idx));

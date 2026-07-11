@@ -943,8 +943,8 @@ export default function App() {
               // Back to appropriate page
               setCurrentPage('home');
             }}
-            onAddToCart={(p, q, c, s) => handleAddToCart(p, q, c, s)}
-            onBuyNow={(p, q, c, s) => handleBuyNow(p, q, c, s)}
+            onAddToCart={(p, q, c, s, price, img) => handleAddToCart(p, q, c || 'Classic', s || 'Standard', price, img)}
+            onBuyNow={(p, q, c, s, price, img) => handleBuyNow(p, q, c || 'Classic', s || 'Standard', price, img)}
             isWishlisted={isWishlisted(currentSelectedProduct.id)}
             onToggleWishlist={handleToggleWishlist}
             isFiveMinActive={isFiveMinActive}

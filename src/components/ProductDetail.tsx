@@ -10,10 +10,10 @@ interface ProductDetailProps {
   relatedProducts?: Product[];
   onSelectRelatedProduct?: (id: string) => void;
   onBack: () => void;
-  onAddToCart: (product: Product, quantity: number, color?: string, size?: string) => void;
+  onAddToCart: (product: Product, quantity: number, color?: string, size?: string, priceOverride?: number, imageOverride?: string) => void;
   isWishlisted: boolean;
   onToggleWishlist: (product: Product) => void;
-  onBuyNow?: (product: Product, quantity: number, color?: string, size?: string) => void;
+  onBuyNow?: (product: Product, quantity: number, color?: string, size?: string, priceOverride?: number, imageOverride?: string) => void;
   isFiveMinActive?: boolean;
 }
 
@@ -28,24 +28,21 @@ export default function ProductDetail({
   onBuyNow,
   isFiveMinActive,
 }: ProductDetailProps) {
+  const hasColorVariants = !!(product.variants && product.variants.length > 0);
+  const hasSizeVariants = false;
+
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState('Classic');
+  const [selectedColor, setSelectedColor] = useState(() => {
+    return product.variants && product.variants.length > 0 ? (product.variants[0].color || 'Classic') : 'Classic';
+  });
   const [selectedSize, setSelectedSize] = useState('Standard');
   const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
   const [newReviewComment, setNewReviewComment] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [newReviewUser, setNewReviewUser] = useState('');
 
-  const hasColorVariants = ['dresses', 'fashion', 'beauty', 'cosmetics', 'accessories'].includes(product.category);
-  const hasSizeVariants = ['dresses', 'fashion', 'accessories'].includes(product.category);
-  const colors = hasColorVariants ? ['Classic', 'Cream', 'Slate Grey'] : [];
-  const sizes = hasSizeVariants
-    ? (product.category === 'dresses'
-      ? ['S', 'M', 'L', 'XL']
-      : product.category === 'accessories' && product.id.includes('sneakers')
-        ? ['UK 7', 'UK 8', 'UK 9', 'UK 10']
-        : ['Standard', 'Luxury Edition'])
-    : [];
+  const colors = hasColorVariants ? (product.variants!.map(v => v.color).filter(Boolean) as string[]) : [];
+  const sizes: string[] = [];
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,17 +62,24 @@ export default function ProductDetail({
     setNewReviewRating(5);
   };
 
+  const activeVariant = React.useMemo(() => {
+    if (!hasColorVariants || !product.variants) return null;
+    return product.variants.find((v) => v.color === selectedColor);
+  }, [selectedColor, product.variants, hasColorVariants]);
+
   const handleAddToCartClick = () => {
     onAddToCart(
       product,
       quantity,
       hasColorVariants ? selectedColor : undefined,
-      hasSizeVariants ? selectedSize : undefined
+      hasSizeVariants ? selectedSize : undefined,
+      activeVariant?.price,
+      activeVariant?.image
     );
     const btn = document.getElementById('add-to-cart-detail-btn');
     if (btn) {
       const originalText = btn.innerHTML;
-      btn.innerHTML = 'âœ“ Added!';
+      btn.innerHTML = '✓ Added!';
       btn.classList.add('bg-green-600');
       setTimeout(() => {
         btn.innerHTML = originalText;
@@ -102,24 +106,33 @@ export default function ProductDetail({
   };
 
   const galleryImages = product.images && product.images.length > 0 ? product.images : [product.image];
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(-1);
 
   useEffect(() => {
-    setActiveImageIndex(0);
+    setActiveImageIndex(-1);
   }, [product.id, product.image, product.images]);
 
-  const activeImage = galleryImages[activeImageIndex] || galleryImages[0];
+  const activeImage = activeImageIndex >= 0 ? galleryImages[activeImageIndex] : (activeVariant?.image || galleryImages[0]);
+  const activePrice = activeVariant?.price !== undefined ? activeVariant.price : product.price;
 
   const goPrevImage = () => {
-    setActiveImageIndex((idx) => (idx === 0 ? galleryImages.length - 1 : idx - 1));
+    const fallbackLen = galleryImages.length;
+    setActiveImageIndex((idx) => {
+      const current = idx >= 0 ? idx : 0;
+      return current === 0 ? fallbackLen - 1 : current - 1;
+    });
   };
 
   const goNextImage = () => {
-    setActiveImageIndex((idx) => (idx >= galleryImages.length - 1 ? 0 : idx + 1));
+    const fallbackLen = galleryImages.length;
+    setActiveImageIndex((idx) => {
+      const current = idx >= 0 ? idx : 0;
+      return current >= fallbackLen - 1 ? 0 : current + 1;
+    });
   };
 
   const discountPercent = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    ? Math.round(((product.originalPrice - activePrice) / product.originalPrice) * 100)
     : 0;
 
   return (
@@ -203,14 +216,18 @@ export default function ProductDetail({
                     product,
                     quantity,
                     hasColorVariants ? selectedColor : undefined,
-                    hasSizeVariants ? selectedSize : undefined
+                    hasSizeVariants ? selectedSize : undefined,
+                    activeVariant?.price,
+                    activeVariant?.image
                   );
                 } else {
                   onAddToCart(
                     product,
                     quantity,
                     hasColorVariants ? selectedColor : undefined,
-                    hasSizeVariants ? selectedSize : undefined
+                    hasSizeVariants ? selectedSize : undefined,
+                    activeVariant?.price,
+                    activeVariant?.image
                   );
                 }
               }}
@@ -239,7 +256,7 @@ export default function ProductDetail({
             {/* Rating Stars Summary */}
             <div className="flex items-center gap-2 mt-2">
               <span className="bg-[#388e3c] text-white text-xs font-bold px-2 py-0.5 rounded-sm flex items-center gap-0.5">
-                {product.rating} <span className="text-[8px]">â˜…</span>
+                {product.rating} <span className="text-[8px]">★</span>
               </span>
               <span className="text-xs text-gray-400 font-bold">
                 ({reviews.length} Ratings & {reviews.length} Reviews)
@@ -250,7 +267,7 @@ export default function ProductDetail({
           {/* Pricing Row */}
           <div className="flex items-baseline gap-3 p-4 bg-gray-50 border border-gray-200 rounded-sm">
             <span className="text-2xl font-black text-gray-900">
-              ₹{product.price.toLocaleString('en-IN')}
+              ₹{activePrice.toLocaleString('en-IN')}
             </span>
             {product.originalPrice && (
               <>
@@ -275,24 +292,38 @@ export default function ProductDetail({
           {/* Customizations selectors */}
           <div className="space-y-4 pt-4 border-t border-gray-150">
             {/* Color Selector */}
-            {hasColorVariants && colors.length > 0 && (
+            {hasColorVariants && product.variants && product.variants.length > 0 && (
               <div>
                 <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-2">
-                  Select Style/Color: <span className="text-primary font-black">{selectedColor}</span>
+                  Selected Color: <span className="text-primary font-black">{selectedColor}</span>
                 </span>
-                <div className="flex gap-2 flex-wrap">
-                  {colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-sm border transition-all cursor-pointer ${selectedColor === color
-                          ? 'border-primary bg-primary text-white shadow-sm'
-                          : 'border-gray-200 bg-white text-gray-600 hover:border-primary'
+                <div className="flex gap-3 flex-wrap">
+                  {product.variants.map((v) => {
+                    if (!v.color) return null;
+                    const isSelected = selectedColor === v.color;
+
+                    return (
+                      <button
+                        key={v.color}
+                        type="button"
+                        onClick={() => setSelectedColor(v.color || '')}
+                        className={`w-16 h-16 rounded-xl overflow-hidden bg-white border-2 flex items-center justify-center p-1 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-primary shadow-sm scale-105'
+                            : 'border-gray-200/80 hover:border-primary/50'
                         }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
+                        title={v.color}
+                      >
+                        {v.image ? (
+                          <img src={v.image} alt={v.color} className="max-h-full max-w-full object-contain" />
+                        ) : (
+                          <div className="text-[10px] font-bold text-gray-500 text-center uppercase leading-none px-1">
+                            {v.color}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

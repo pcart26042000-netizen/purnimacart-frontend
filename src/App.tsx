@@ -7,7 +7,8 @@ import {
   Heart,
   User,
   ArrowRight,
-  ShoppingCart
+  ShoppingCart,
+  Package
 } from 'lucide-react';
 
 import { Product, PageType, AdminSection } from './types';
@@ -1207,6 +1208,16 @@ export default function App() {
         >
           <Heart size={18} />
           <span className="text-[10px] font-bold mt-0.5">Wishlist</span>
+        </button>
+
+        <button
+          onClick={() => requireAuth('my-orders')}
+          className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
+            currentPage === 'my-orders' ? 'text-primary font-bold' : 'text-[#5e3f3b]/70 hover:text-primary'
+          }`}
+        >
+          <Package size={18} />
+          <span className="text-[10px] font-bold mt-0.5">Orders</span>
         </button>
       </nav>
 

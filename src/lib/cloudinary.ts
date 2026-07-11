@@ -45,6 +45,10 @@ interface OpenUploadWidgetOptions {
   onProgress?: (percent: number) => void;
   onClose?: () => void;
   onError?: (message: string) => void;
+  cropping?: boolean;
+  croppingAspectRatio?: number;
+  croppingShowDimensions?: boolean;
+  croppingCoordinatesMode?: string;
 }
 
 // Opens the hosted Cloudinary Upload Widget. Requires
@@ -79,6 +83,10 @@ export async function openCloudinaryUploadWidget(options: OpenUploadWidgetOption
       sources: ['local', 'url', 'camera'],
       // Ask Cloudinary to hand back optimized delivery URLs.
       resourceType: 'image',
+      cropping: options.cropping,
+      croppingAspectRatio: options.croppingAspectRatio,
+      croppingShowDimensions: options.croppingShowDimensions,
+      croppingCoordinatesMode: options.croppingCoordinatesMode,
     },
     (error: any, result: any) => {
       if (error) {

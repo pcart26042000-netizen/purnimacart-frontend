@@ -46,6 +46,9 @@ function BannerFormModal({
     openCloudinaryUploadWidget({
       multiple: false,
       folder: 'purnimacart/banners',
+      cropping: true,
+      croppingAspectRatio: 2.77,
+      croppingShowDimensions: true,
       onSuccess: (result) => set('imageUrl', result.secureUrl),
       onError: (message) => onToast(message, 'info'),
     });
@@ -99,7 +102,7 @@ function BannerFormModal({
           <div>
             <label className="text-xs font-bold uppercase tracking-wide text-[#5e3f3b]/50 mb-2 block">Image</label>
             {form.imageUrl ? (
-              <div className="relative rounded-xl overflow-hidden border border-[#e8bcb7]/20 aspect-[16/6]">
+              <div className="relative rounded-xl overflow-hidden border border-[#e8bcb7]/20 aspect-[25/9]">
                 <img src={form.imageUrl} alt="" className="w-full h-full object-cover" />
                 <button type="button" onClick={handleUploadImage} className="absolute inset-0 bg-black/40 text-white opacity-0 hover:opacity-100 flex items-center justify-center text-xs font-bold transition-opacity cursor-pointer">
                   Replace image
@@ -109,12 +112,15 @@ function BannerFormModal({
               <button
                 type="button"
                 onClick={handleUploadImage}
-                className="w-full aspect-[16/6] rounded-xl border-2 border-dashed border-[#e8bcb7]/40 flex flex-col items-center justify-center gap-1.5 text-[#5e3f3b]/50 hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                className="w-full aspect-[25/9] rounded-xl border-2 border-dashed border-[#e8bcb7]/40 flex flex-col items-center justify-center gap-1.5 text-[#5e3f3b]/50 hover:border-primary hover:text-primary transition-colors cursor-pointer"
               >
                 <ImagePlus size={20} />
                 <span className="text-[11px] font-bold">Upload banner image</span>
               </button>
             )}
+            <p className="text-[10px] text-gray-400 font-bold mt-1.5 leading-normal">
+              Recommended: 1500 x 540 px (Aspect ratio: 25:9). The built-in cropping tool will open automatically to crop your image to this ratio.
+            </p>
           </div>
           <div>
             <label className="text-xs font-bold uppercase tracking-wide text-[#5e3f3b]/50 mb-1.5 block">Internal Label (optional)</label>
@@ -215,7 +221,7 @@ export default function AdminBanners({ onToast }: AdminBannersProps) {
             const live = isBannerLive(b);
             return (
               <div key={b.id} className="bg-white rounded-2xl border border-[#e8bcb7]/20 shadow-sm overflow-hidden">
-                <div className="relative aspect-[16/6] bg-[#fff0ee]">
+                <div className="relative aspect-[25/9] bg-[#fff0ee]">
                   <img src={b.imageUrl} alt={b.title || 'Banner'} className="w-full h-full object-cover" />
                   <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${live ? 'bg-emerald-500 text-white' : 'bg-black/50 text-white'}`}>
                     {live ? 'Live' : b.isActive ? 'Scheduled' : 'Inactive'}

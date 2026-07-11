@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Search, Eye, X, MapPin, Package, CreditCard } from 'lucide-react';
+import { Search, Eye, X, MapPin, Package, CreditCard, PackageX, AlertTriangle } from 'lucide-react';
 import type { FirestoreOrder, OrderStatus } from '../types/firestore';
 import { useAdminOrders } from './hooks/useAdminOrders';
-import { updateOrderStatusAdmin } from '../lib/services/orders';
+import { updateOrderStatusAdmin, handleCancelRequestAdmin } from '../lib/services/orders';
 import { LoadingBlock, ErrorBlock, EmptyState } from './components/LoadingState';
 import ConfirmDialog from './components/ConfirmDialog';
 import Pagination from './components/Pagination';
@@ -45,13 +45,18 @@ function OrderDetailModal({
   const [trackingNote, setTrackingNote] = useState(order.trackingNote || '');
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
   const [saving, setSaving] = useState(false);
+  
+  const [rejectReason, setRejectReason] = useState('');
+  const [showRejectPrompt, setShowRejectPrompt] = useState(false);
+  const [showCancelAcceptPrompt, setShowCancelAcceptPrompt] = useState(false);
+
   const nextOptions = NEXT_STATUSES[order.orderStatus];
 
   const applyStatus = async (status: OrderStatus) => {
     setSaving(true);
     try {
       await updateOrderStatusAdmin(order.id, status, trackingNote);
-      onToast(status === 'cancelled' ? 'Order cancelled â€” stock restored.' : `Order marked as ${status}.`);
+      onToast(status === 'cancelled' ? 'Order cancelled — stock restored.' : `Order marked as ${status}.`);
       onClose();
     } catch (error: any) {
       console.error(error);
@@ -59,6 +64,22 @@ function OrderDetailModal({
     } finally {
       setSaving(false);
       setPendingStatus(null);
+    }
+  };
+
+  const handleCancelRequest = async (accept: boolean) => {
+    setSaving(true);
+    try {
+      await handleCancelRequestAdmin(order.id, accept, accept ? undefined : rejectReason.trim());
+      onToast(accept ? 'Order cancellation request accepted.' : 'Order cancellation request rejected.');
+      onClose();
+    } catch (error: any) {
+      console.error(error);
+      onToast(error.message || 'Could not process cancellation request.', 'info');
+    } finally {
+      setSaving(false);
+      setShowCancelAcceptPrompt(false);
+      setShowRejectPrompt(false);
     }
   };
 
@@ -92,6 +113,63 @@ function OrderDetailModal({
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Cancellation Request Section */}
+          {order.cancelRequested && order.cancelRequestStatus === 'pending' && (
+            <div className="bg-rose-50 border border-rose-100 rounded-2xl p-5 space-y-4 animate-[fadeIn_0.15s_ease-out]">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-rose-100/70 text-rose-700 rounded-xl mt-0.5 shrink-0">
+                  <PackageX size={18} />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-rose-800 uppercase tracking-wider">Cancellation Requested</h4>
+                  <p className="text-xs text-rose-700 leading-relaxed">
+                    Reason: <span className="font-semibold italic">"{order.cancelReason}"</span>
+                  </p>
+                  {order.cancelRequestedAt && (
+                    <p className="text-[10px] text-rose-500/80">
+                      Requested on: {order.cancelRequestedAt.toDate ? order.cancelRequestedAt.toDate().toLocaleString('en-IN') : String(order.cancelRequestedAt)}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end pt-1">
+                <button
+                  onClick={() => setShowRejectPrompt(true)}
+                  disabled={saving}
+                  className="bg-white border border-rose-200 text-rose-700 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-rose-100/50 transition-colors cursor-pointer disabled:opacity-60"
+                >
+                  Reject Request
+                </button>
+                <button
+                  onClick={() => setShowCancelAcceptPrompt(true)}
+                  disabled={saving}
+                  className="bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-rose-700 transition-colors cursor-pointer disabled:opacity-60"
+                >
+                  Accept & Cancel Order
+                </button>
+              </div>
+            </div>
+          )}
+
+          {order.cancelRequested && order.cancelRequestStatus === 'rejected' && (
+            <div className="bg-gray-50 border border-gray-200/60 rounded-2xl p-4 flex items-start gap-3 animate-[fadeIn_0.15s_ease-out]">
+              <div className="p-2 bg-gray-200/50 text-gray-500 rounded-xl mt-0.5 shrink-0">
+                <Package size={16} />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Cancellation Request Declined</h4>
+                <p className="text-xs text-gray-600">
+                  Reason: <span className="font-semibold italic">"{order.cancelReason}"</span>
+                </p>
+                {order.cancelRejectReason && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Declined reason: <span className="font-semibold">"{order.cancelRejectReason}"</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Items */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wide text-[#5e3f3b]/50 mb-3 flex items-center gap-1.5">
@@ -223,6 +301,68 @@ function OrderDetailModal({
         onConfirm={() => applyStatus('cancelled')}
         onCancel={() => setPendingStatus(null)}
       />
+
+      <ConfirmDialog
+        open={showCancelAcceptPrompt}
+        title="Accept Cancellation Request?"
+        description="This will accept the cancellation request, mark the order as cancelled, restore stock for all items, and flag payment for refund if already paid."
+        confirmLabel="Accept Cancellation"
+        loading={saving}
+        onConfirm={() => handleCancelRequest(true)}
+        onCancel={() => setShowCancelAcceptPrompt(false)}
+      />
+
+      {showRejectPrompt && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/55 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]" onClick={() => setShowRejectPrompt(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-[slideUp_0.2s_ease-out] border border-[#e8bcb7]/20 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e8bcb7]/15 pb-3">
+              <h3 className="font-display font-bold text-sm text-[#291715]">Reject Cancellation Request</h3>
+              <button
+                onClick={() => setShowRejectPrompt(false)}
+                className="text-[#5e3f3b]/50 hover:text-primary cursor-pointer"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <p className="text-xs text-[#5e3f3b]/70">
+                Are you sure you want to decline this cancellation request? You can optionally provide a reason for the customer.
+              </p>
+              
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wide text-[#5e3f3b]/60">Rejection Reason (Optional)</label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="e.g., Order has already been packaged and handed over to courier."
+                  rows={3}
+                  className="w-full bg-[#fff8f7] border border-[#e8bcb7]/20 rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary text-[#291715]"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={() => setShowRejectPrompt(false)}
+                disabled={saving}
+                className="flex-grow bg-[#fff0ee] text-[#5e3f3b] text-xs font-bold py-2.5 rounded-xl hover:bg-[#ffe4df] transition-colors cursor-pointer text-center"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleCancelRequest(false)}
+                disabled={saving}
+                className="flex-grow bg-primary text-white text-xs font-bold py-2.5 rounded-xl hover:bg-[#9a000e] transition-colors cursor-pointer disabled:opacity-60 text-center"
+              >
+                {saving ? 'Rejecting...' : 'Reject Request'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -310,9 +450,16 @@ export default function AdminOrders({ onToast }: AdminOrdersProps) {
                     <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs">{o.paymentMethod === 'cod' ? 'COD' : 'Razorpay'}</td>
                     <td className="px-5 py-3.5 font-bold text-[#291715]">₹{o.total.toLocaleString('en-IN')}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[o.orderStatus]}`}>
-                        {o.orderStatus}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[o.orderStatus]}`}>
+                          {o.orderStatus}
+                        </span>
+                        {o.cancelRequested && o.cancelRequestStatus === 'pending' && (
+                          <span className="text-[9px] font-bold bg-red-100 text-red-700 px-1.5 py-0.5 rounded-md leading-none tracking-wide uppercase shrink-0">
+                            Cancel Req
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <button

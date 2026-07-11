@@ -128,6 +128,11 @@ export interface FirestoreOrder {
   orderStatus: OrderStatus;
   trackingNote?: string;
   couponCode?: string;
+  cancelRequested?: boolean;
+  cancelReason?: string;
+  cancelRequestedAt?: Timestamp | null;
+  cancelRequestStatus?: 'pending' | 'accepted' | 'rejected';
+  cancelRejectReason?: string;
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 }

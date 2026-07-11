@@ -94,7 +94,15 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid &&
         request.resource.data.paymentMethod == 'cod' &&
         request.resource.data.paymentStatus == 'unpaid';
-      allow update: if isAdmin();
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        resource.data.userId == request.auth.uid &&
+        (resource.data.orderStatus == 'pending' || resource.data.orderStatus == 'packed') &&
+        !('cancelRequested' in resource.data && resource.data.cancelRequested == true) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['cancelRequested', 'cancelReason', 'cancelRequestedAt', 'cancelRequestStatus', 'updatedAt']) &&
+        request.resource.data.cancelRequested == true &&
+        request.resource.data.cancelRequestStatus == 'pending'
+      );
       allow delete: if false;
     }
 

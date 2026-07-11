@@ -132,3 +132,85 @@ export async function updateOrderStatusAdmin(
     throw error;
   }
 }
+
+export async function requestOrderCancellation(orderId: string, reason: string): Promise<void> {
+  try {
+    const orderRef = doc(db, COL, orderId);
+    await runTransaction(db, async (transaction) => {
+      const snap = await transaction.get(orderRef);
+      if (!snap.exists()) {
+        throw new Error('Order not found.');
+      }
+      const data = snap.data() as FirestoreOrder;
+      if (data.orderStatus !== 'pending' && data.orderStatus !== 'packed') {
+        throw new Error('Order cannot be cancelled at this stage.');
+      }
+      if (data.cancelRequested) {
+        throw new Error('Cancellation request has already been submitted.');
+      }
+      transaction.update(orderRef, {
+        cancelRequested: true,
+        cancelReason: reason,
+        cancelRequestedAt: Timestamp.now(),
+        cancelRequestStatus: 'pending',
+        updatedAt: Timestamp.now(),
+      });
+    });
+  } catch (error: any) {
+    console.error('requestOrderCancellation error:', error);
+    throw error;
+  }
+}
+
+export async function handleCancelRequestAdmin(
+  orderId: string,
+  accept: boolean,
+  rejectReason?: string
+): Promise<void> {
+  try {
+    await runTransaction(db, async (transaction) => {
+      const orderRef = doc(db, COL, orderId);
+      const orderSnap = await transaction.get(orderRef);
+      if (!orderSnap.exists()) {
+        throw new Error('Order not found.');
+      }
+      const orderData = orderSnap.data() as FirestoreOrder;
+      
+      const updates: any = {
+        updatedAt: Timestamp.now(),
+      };
+      
+      if (accept) {
+        updates.orderStatus = 'cancelled';
+        updates.cancelRequestStatus = 'accepted';
+        
+        // Restore stock
+        for (const item of orderData.items) {
+          const prodRef = doc(db, 'products', item.productId);
+          const prodSnap = await transaction.get(prodRef);
+          if (prodSnap.exists()) {
+            const prodData = prodSnap.data();
+            transaction.update(prodRef, {
+              stock: prodData.stock + item.qty,
+            });
+          }
+        }
+        
+        // Mark payment as refunded if it was paid
+        if (orderData.paymentStatus === 'paid') {
+          updates.paymentStatus = 'refunded';
+        }
+      } else {
+        updates.cancelRequestStatus = 'rejected';
+        if (rejectReason !== undefined) {
+          updates.cancelRejectReason = rejectReason;
+        }
+      }
+      
+      transaction.update(orderRef, updates);
+    });
+  } catch (error: any) {
+    console.error('handleCancelRequestAdmin error:', error);
+    throw error;
+  }
+}

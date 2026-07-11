@@ -81,10 +81,10 @@ export default function ProductCard({
       <div className="pt-2.5 px-0.5 flex flex-col gap-0.5">
         {/* Brand/Category & Name row */}
         <div className="flex items-baseline gap-1.5 flex-wrap">
-          <span className="text-[10px] sm:text-[11px] font-extrabold text-primary uppercase tracking-wide">
+          <span className="text-[11px] sm:text-xs font-extrabold text-primary uppercase tracking-wide">
             {product.category}
           </span>
-          <h3 className="font-sans font-bold text-[11px] sm:text-xs text-gray-900 group-hover:text-primary transition-colors line-clamp-1 flex-1">
+          <h3 className="font-sans font-bold text-xs sm:text-sm text-gray-900 group-hover:text-primary transition-colors line-clamp-1 flex-1">
             {product.name}
           </h3>
         </div>
@@ -92,16 +92,16 @@ export default function ProductCard({
         {/* Pricing Row */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {product.originalPrice && (
-            <span className="text-emerald-600 text-[11px] sm:text-xs font-extrabold flex items-center">
+            <span className="text-emerald-600 text-xs sm:text-sm font-extrabold flex items-center">
               ↓{discountPercent}%
             </span>
           )}
           {product.originalPrice && (
-            <span className="text-gray-400 line-through text-[10px] sm:text-[11px]">
+            <span className="text-gray-400 line-through text-[11px] sm:text-xs">
               ₹{product.originalPrice.toLocaleString('en-IN')}
             </span>
           )}
-          <span className="text-gray-950 font-black text-[12px] sm:text-sm">
+          <span className="text-gray-950 font-black text-sm sm:text-base">
             ₹{product.price.toLocaleString('en-IN')}
           </span>
         </div>
@@ -110,7 +110,7 @@ export default function ProductCard({
         <div className="flex flex-wrap gap-1 items-center pt-0.5">
           <FiveMinDeliveryBadge product={product} isActive={isFiveMinActive} />
           {discountPercent >= 20 && (
-            <span className="bg-[#fff0ee] text-primary text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded border border-primary/10">
+            <span className="bg-[#fff0ee] text-primary text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-primary/10">
               WOW Offer
             </span>
           )}

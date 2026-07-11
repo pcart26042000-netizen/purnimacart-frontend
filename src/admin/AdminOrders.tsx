@@ -7,7 +7,7 @@ import { LoadingBlock, ErrorBlock, EmptyState } from './components/LoadingState'
 import ConfirmDialog from './components/ConfirmDialog';
 import Pagination from './components/Pagination';
 
-const FILTERS: (OrderStatus | 'all')[] = ['all', 'pending', 'packed', 'shipped', 'delivered', 'cancelled'];
+const FILTERS: (OrderStatus | 'all' | 'cancel_requested')[] = ['all', 'pending', 'packed', 'shipped', 'delivered', 'cancelled', 'cancel_requested'];
 const PAGE_SIZE = 10;
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -376,7 +376,11 @@ export default function AdminOrders({ onToast }: AdminOrdersProps) {
 
   const filtered = useMemo(() => {
     let result = orders;
-    if (filter !== 'all') result = result.filter((o) => o.orderStatus === filter);
+    if (filter === 'cancel_requested') {
+      result = result.filter((o) => o.cancelRequested && o.cancelRequestStatus === 'pending');
+    } else if (filter !== 'all') {
+      result = result.filter((o) => o.orderStatus === filter);
+    }
     if (query.trim()) {
       const q = query.trim().toLowerCase();
       result = result.filter(
@@ -405,7 +409,7 @@ export default function AdminOrders({ onToast }: AdminOrdersProps) {
                   : 'bg-white border border-[#e8bcb7]/20 text-[#5e3f3b] hover:border-primary'
               }`}
             >
-              {f}
+              {f === 'cancel_requested' ? 'Cancel Requests' : f}
             </button>
           ))}
         </div>

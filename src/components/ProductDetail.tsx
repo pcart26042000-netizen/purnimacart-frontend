@@ -160,6 +160,16 @@ export default function ProductDetail({
   const currentStock = activeVariant?.stock !== undefined ? activeVariant.stock : (product as any).stock;
   const isOutOfStock = currentStock <= 0;
 
+  console.log('ProductDetail Debug:', {
+    id: product.id,
+    name: product.name,
+    variants: product.variants,
+    variantImages,
+    galleryImages,
+    activeImageIndex,
+    activeImage,
+  });
+
   return (
     <div className="py-3 md:py-6 px-0 max-w-7xl mx-auto">
       {/* Back Button */}

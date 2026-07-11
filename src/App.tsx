@@ -1158,18 +1158,18 @@ export default function App() {
       />
 
       {/* Bottom Sticky Mobile Nav Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-[var(--brand-soft-surface)] backdrop-blur-md border-t border-[#e8bcb7]/20 shadow-xl h-16">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-[var(--brand-soft-surface)] backdrop-blur-md border-t border-[#e8bcb7]/20 shadow-xl h-[72px]">
         <button
           onClick={() => {
             setCurrentPage('home');
             setSelectedProductId(null);
           }}
-          className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
-            currentPage === 'home' ? 'text-primary font-bold' : 'text-[#5e3f3b]/70 hover:text-primary'
+          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${
+            currentPage === 'home' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
           }`}
         >
-          <HomeIcon size={18} />
-          <span className="text-[10px] font-bold mt-0.5">Home</span>
+          <HomeIcon size={22} />
+          <span className="text-[11px] font-bold mt-1">Home</span>
         </button>
 
         <button
@@ -1177,24 +1177,24 @@ export default function App() {
             setSelectedCategory('all');
             setCurrentPage('category');
           }}
-          className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
-            currentPage === 'category' ? 'text-primary font-bold' : 'text-[#5e3f3b]/70 hover:text-primary'
+          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${
+            currentPage === 'category' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
           }`}
         >
-          <GridIcon size={18} />
-          <span className="text-[10px] font-bold mt-0.5">Browse</span>
+          <GridIcon size={22} />
+          <span className="text-[11px] font-bold mt-1">Browse</span>
         </button>
 
         <button
           onClick={() => {
             setCartOpen(true);
           }}
-          className="flex flex-col items-center justify-center cursor-pointer text-[#5e3f3b]/70 hover:text-primary relative"
+          className="flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 text-[#5e3f3b]/70 hover:text-primary relative"
         >
-          <ShoppingCart size={18} />
-          <span className="text-[10px] font-bold mt-0.5">Cart</span>
+          <ShoppingCart size={22} />
+          <span className="text-[11px] font-bold mt-1">Cart</span>
           {cartItems.length > 0 && (
-            <span className="absolute -top-1.5 -right-2 bg-primary text-white text-[9px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
+            <span className="absolute -top-1.5 -right-2 bg-primary text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center border border-white">
               {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
             </span>
           )}
@@ -1202,22 +1202,22 @@ export default function App() {
 
         <button
           onClick={() => requireAuth('wishlist')}
-          className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
-            currentPage === 'wishlist' ? 'text-primary font-bold' : 'text-[#5e3f3b]/70 hover:text-primary'
+          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${
+            currentPage === 'wishlist' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
           }`}
         >
-          <Heart size={18} />
-          <span className="text-[10px] font-bold mt-0.5">Wishlist</span>
+          <Heart size={22} />
+          <span className="text-[11px] font-bold mt-1">Wishlist</span>
         </button>
 
         <button
           onClick={() => requireAuth('my-orders')}
-          className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
-            currentPage === 'my-orders' ? 'text-primary font-bold' : 'text-[#5e3f3b]/70 hover:text-primary'
+          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${
+            currentPage === 'my-orders' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
           }`}
         >
-          <Package size={18} />
-          <span className="text-[10px] font-bold mt-0.5">Orders</span>
+          <Package size={22} />
+          <span className="text-[11px] font-bold mt-1">Orders</span>
         </button>
       </nav>
 

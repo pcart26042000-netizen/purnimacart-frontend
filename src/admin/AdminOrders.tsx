@@ -46,6 +46,16 @@ function OrderDetailModal({
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
   const [saving, setSaving] = useState(false);
   
+  const [shippedDate, setShippedDate] = useState(() => {
+    const d = new Date();
+    return d.toISOString().split('T')[0];
+  });
+  const [deliveryDate, setDeliveryDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 3);
+    return d.toISOString().split('T')[0];
+  });
+
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectPrompt, setShowRejectPrompt] = useState(false);
   const [showCancelAcceptPrompt, setShowCancelAcceptPrompt] = useState(false);
@@ -57,6 +67,25 @@ function OrderDetailModal({
     try {
       await updateOrderStatusAdmin(order.id, status, trackingNote);
       onToast(status === 'cancelled' ? 'Order cancelled — stock restored.' : `Order marked as ${status}.`);
+      onClose();
+    } catch (error: any) {
+      console.error(error);
+      onToast(error.message || 'Could not update order status.', 'info');
+    } finally {
+      setSaving(false);
+      setPendingStatus(null);
+    }
+  };
+
+  const applyStatusWithDates = async (status: OrderStatus) => {
+    if (!shippedDate || !deliveryDate) {
+      onToast('Please fill in both Shipped and Estimated Delivery dates.', 'info');
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateOrderStatusAdmin(order.id, status, trackingNote, shippedDate, deliveryDate);
+      onToast(`Order marked as ${status}.`);
       onClose();
     } catch (error: any) {
       console.error(error);
@@ -275,7 +304,13 @@ function OrderDetailModal({
                 {nextOptions.map((status) => (
                   <button
                     key={status}
-                    onClick={() => (status === 'cancelled' ? setPendingStatus('cancelled') : applyStatus(status))}
+                    onClick={() =>
+                      status === 'cancelled'
+                        ? setPendingStatus('cancelled')
+                        : status === 'packed'
+                        ? setPendingStatus('packed')
+                        : applyStatus(status)
+                    }
                     disabled={saving}
                     className={`text-xs font-bold px-4 py-2.5 rounded-xl transition-colors cursor-pointer disabled:opacity-60 capitalize ${
                       status === 'cancelled'
@@ -301,6 +336,73 @@ function OrderDetailModal({
         onConfirm={() => applyStatus('cancelled')}
         onCancel={() => setPendingStatus(null)}
       />
+
+      {pendingStatus === 'packed' && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 animate-[fadeIn_0.15s_ease-out]" onClick={() => setPendingStatus(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-[slideUp_0.2s_ease-out] space-y-4">
+            <button
+              onClick={() => setPendingStatus(null)}
+              className="absolute top-4 right-4 text-[#5e3f3b]/50 hover:text-primary cursor-pointer"
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
+              <Package size={19} />
+            </div>
+            <h3 className="font-display font-bold text-base text-[#291715]">Confirm & Pack Order</h3>
+            <p className="text-xs text-[#5e3f3b]/70 leading-relaxed">
+              To confirm this order and mark it as Packed, please specify the expected shipped and estimated delivery dates:
+            </p>
+            
+            <div className="space-y-3 pt-2">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#5e3f3b]/60 mb-1.5 block">
+                  Expected Shipped Date
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={shippedDate}
+                  onChange={(e) => setShippedDate(e.target.value)}
+                  className="w-full bg-[#fff8f7] border border-[#e8bcb7]/20 rounded-xl px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-primary text-[#291715]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#5e3f3b]/60 mb-1.5 block">
+                  Expected Delivery Date
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={deliveryDate}
+                  onChange={(e) => setDeliveryDate(e.target.value)}
+                  className="w-full bg-[#fff8f7] border border-[#e8bcb7]/20 rounded-xl px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-primary text-[#291715]"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 mt-6">
+              <button
+                onClick={() => setPendingStatus(null)}
+                disabled={saving}
+                className="flex-1 bg-[#fff0ee] text-[#5e3f3b] text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-[#ffe4df] transition-colors cursor-pointer disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => applyStatusWithDates('packed')}
+                disabled={saving || !shippedDate || !deliveryDate}
+                className="flex-1 bg-primary hover:bg-[#9a000e] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors cursor-pointer disabled:opacity-60 font-semibold"
+              >
+                {saving ? 'Please wait…' : 'Confirm Order'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmDialog
         open={showCancelAcceptPrompt}

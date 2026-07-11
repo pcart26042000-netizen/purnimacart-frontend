@@ -86,7 +86,9 @@ export function subscribeAllOrdersAdmin(
 export async function updateOrderStatusAdmin(
   orderId: string,
   status: OrderStatus,
-  trackingNote?: string
+  trackingNote?: string,
+  shippedDate?: string,
+  deliveryDate?: string
 ): Promise<void> {
   try {
     await runTransaction(db, async (transaction) => {
@@ -104,6 +106,12 @@ export async function updateOrderStatusAdmin(
       
       if (trackingNote !== undefined) {
         updates.trackingNote = trackingNote;
+      }
+      if (shippedDate !== undefined) {
+        updates.shippedDate = shippedDate;
+      }
+      if (deliveryDate !== undefined) {
+        updates.deliveryDate = deliveryDate;
       }
       
       if (status === 'cancelled' && orderData.orderStatus !== 'cancelled') {

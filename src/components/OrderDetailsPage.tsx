@@ -18,6 +18,16 @@ const STEP_LABEL: Record<OrderStatus, string> = {
   cancelled: 'Cancelled',
 };
 
+function formatTimelineDate(dateStr?: string) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  }
+  return dateStr;
+}
+
 export default function OrderDetailsPage({ orderId, onBack }: OrderDetailsPageProps) {
   const [order, setOrder] = useState<FirestoreOrder | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,6 +153,17 @@ export default function OrderDetailsPage({ orderId, onBack }: OrderDetailsPagePr
                     <span className={`text-[10px] font-bold text-center ${isDone ? 'text-primary' : 'text-[#5e3f3b]/50'}`}>
                       {STEP_LABEL[step]}
                     </span>
+                    {step === 'shipped' && order.shippedDate && (
+                      <span className="text-[9px] text-[#5e3f3b]/70 font-semibold mt-0.5 whitespace-nowrap">
+                        {formatTimelineDate(order.shippedDate)}
+                      </span>
+                    )}
+                    {step === 'delivered' && order.deliveryDate && (
+                      <span className="text-[9px] text-[#5e3f3b]/70 font-semibold mt-0.5 whitespace-nowrap">
+                        {order.orderStatus === 'delivered' ? 'Delivered: ' : 'Est: '}
+                        {formatTimelineDate(order.deliveryDate)}
+                      </span>
+                    )}
                   </div>
                   {idx < TIMELINE_STEPS.length - 1 && (
                     <div className={`h-0.5 flex-1 -mt-6 ${idx < currentStepIndex ? 'bg-primary' : 'bg-[#e8bcb7]/30'}`} />

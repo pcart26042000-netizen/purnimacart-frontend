@@ -134,6 +134,8 @@ export interface FirestoreOrder {
   cancelRequestedAt?: Timestamp | null;
   cancelRequestStatus?: 'pending' | 'accepted' | 'rejected';
   cancelRejectReason?: string;
+  shippedDate?: string;
+  deliveryDate?: string;
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 }

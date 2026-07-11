@@ -1,4 +1,4 @@
-﻿export interface Product {
+export interface Product {
   id: string;
   name: string;
   category: string;
@@ -15,6 +15,7 @@
   features?: string[];
   returnWindow?: string;
   isFiveMinBadge?: boolean;
+  variants?: { color?: string; image?: string; price?: number; stock?: number }[];
 }
 
 export interface CartItem {

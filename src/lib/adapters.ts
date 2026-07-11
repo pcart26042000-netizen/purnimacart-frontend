@@ -1,4 +1,4 @@
-﻿// Adapters that convert Firestore documents into the existing UI-facing
+// Adapters that convert Firestore documents into the existing UI-facing
 // types (src/types.ts) so none of the presentational components need to
 // know about the Firestore data model. Keeps Phase 2 wiring isolated from
 // the untouched UI layer.
@@ -36,6 +36,7 @@ export function productFromFirestore(fp: FirestoreProduct): Product {
     features: [],
     returnWindow: fp.returnWindow,
     isFiveMinBadge: !!fp.isFiveMinBadge,
+    variants: fp.variants || [],
   };
 }
 

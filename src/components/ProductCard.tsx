@@ -7,11 +7,30 @@ interface ProductCardProps {
   key?: string;
   product: Product;
   onProductClick: (id: string) => void;
-  onAddToCart: (product: Product, e: React.MouseEvent) => void;
+  onAddToCart: (product: Product, color: string | undefined, price: number | undefined, e: React.MouseEvent) => void;
   isWishlisted: boolean;
   onToggleWishlist: (product: Product, e: React.MouseEvent) => void;
   isFiveMinActive?: boolean;
 }
+
+const COLOR_MAP: Record<string, string> = {
+  red: 'bg-red-500',
+  blue: 'bg-blue-500',
+  green: 'bg-green-600',
+  yellow: 'bg-yellow-400 border border-yellow-500/20',
+  black: 'bg-black',
+  white: 'bg-white border border-gray-300',
+  pink: 'bg-pink-400',
+  purple: 'bg-purple-500',
+  orange: 'bg-orange-500',
+  grey: 'bg-gray-500',
+  gray: 'bg-gray-500',
+  brown: 'bg-amber-800',
+  cream: 'bg-[#fdf6e2] border border-gray-300',
+  gold: 'bg-amber-400 border border-amber-500/20',
+  silver: 'bg-slate-300',
+  classic: 'bg-zinc-800',
+};
 
 export default function ProductCard({
   product,
@@ -21,8 +40,20 @@ export default function ProductCard({
   onToggleWishlist,
   isFiveMinActive,
 }: ProductCardProps) {
+  const [activeColor, setActiveColor] = React.useState<string | undefined>(() => {
+    return product.variants && product.variants.length > 0 ? product.variants[0].color : undefined;
+  });
+
+  const activeVariant = React.useMemo(() => {
+    if (!activeColor || !product.variants) return null;
+    return product.variants.find((v) => v.color === activeColor);
+  }, [activeColor, product.variants]);
+
+  const displayImage = activeVariant?.image || product.image;
+  const activePrice = activeVariant?.price !== undefined ? activeVariant.price : product.price;
+
   const discountPercent = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    ? Math.round(((product.originalPrice - activePrice) / product.originalPrice) * 100)
     : 0;
 
   return (
@@ -33,7 +64,7 @@ export default function ProductCard({
       {/* Card Image Container */}
       <div className="aspect-[3/4] w-full rounded-2xl overflow-hidden relative bg-white border border-gray-100 shadow-sm flex items-center justify-center">
         <img
-          src={product.image}
+          src={displayImage}
           alt={product.name}
           className="w-full h-full object-contain p-3.5 transition-transform duration-700 ease-out group-hover:scale-105"
           loading="lazy"
@@ -68,7 +99,7 @@ export default function ProductCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onAddToCart(product, e);
+            onAddToCart(product, activeColor, activePrice, e);
           }}
           className="absolute bottom-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-hover active:scale-95 transition-all duration-300 shadow-md cursor-pointer"
           title="Add to Cart"
@@ -102,9 +133,38 @@ export default function ProductCard({
             </span>
           )}
           <span className="text-gray-950 font-black text-sm sm:text-base">
-            ₹{product.price.toLocaleString('en-IN')}
+            ₹{activePrice.toLocaleString('en-IN')}
           </span>
         </div>
+
+        {/* Color Swatch Dots Selector */}
+        {product.variants && product.variants.length > 0 && (
+          <div className="flex gap-1.5 items-center my-1.5 flex-wrap">
+            {product.variants.map((v) => {
+              if (!v.color) return null;
+              const normalizedColor = v.color.toLowerCase().trim();
+              const colorClass = COLOR_MAP[normalizedColor] || 'bg-gray-200 text-[8px] flex items-center justify-center font-bold text-gray-600 border border-gray-300';
+              const isSelected = activeColor === v.color;
+
+              return (
+                <button
+                  key={v.color}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveColor(v.color);
+                  }}
+                  className={`w-4 h-4 rounded-full transition-all cursor-pointer ${colorClass} ${
+                    isSelected ? 'ring-2 ring-primary ring-offset-1 scale-110' : 'hover:scale-105'
+                  }`}
+                  title={v.color}
+                >
+                  {!COLOR_MAP[normalizedColor] && v.color ? v.color[0].toUpperCase() : ''}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Badges/Offers */}
         <div className="flex flex-wrap gap-1 items-center pt-0.5">

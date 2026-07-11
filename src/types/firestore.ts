@@ -22,8 +22,9 @@ export interface FirestoreCategory {
 }
 
 export interface ProductVariant {
-  size?: string;
   color?: string;
+  image?: string;
+  price?: number;
   stock?: number;
 }
 

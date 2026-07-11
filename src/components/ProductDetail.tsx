@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight, Heart, ShoppingCart, ShieldCheck, Truck, RefreshCw, Send, Star } from 'lucide-react';
 import { Product, Review } from '../types';
 import { MOCK_REVIEWS } from '../data';
@@ -474,9 +474,10 @@ export default function ProductDetail({
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                   onSelectRelatedProduct?.(id);
                 }}
-                onAddToCart={(p, e) => {
+                onAddToCart={(p, color, price, e) => {
                   e.stopPropagation();
-                  onAddToCart(p, 1);
+                  const modified = price !== undefined ? { ...p, price } : p;
+                  onAddToCart(modified, 1, color);
                 }}
                 isWishlisted={false}
                 onToggleWishlist={(p, e) => {

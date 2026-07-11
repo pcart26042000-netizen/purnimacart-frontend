@@ -107,10 +107,21 @@ function ProductFormModal({
 
   const removeImage = (url: string) => set('images', form.images.filter((i) => i !== url));
 
-  const addVariant = () => set('variants', [...form.variants, { size: '', color: '', stock: 0 }]);
+  const addVariant = () => set('variants', [...form.variants, { color: '', image: '', price: undefined, stock: 0 }]);
   const updateVariant = (idx: number, patch: Partial<ProductVariant>) =>
     set('variants', form.variants.map((v, i) => (i === idx ? { ...v, ...patch } : v)));
   const removeVariant = (idx: number) => set('variants', form.variants.filter((_, i) => i !== idx));
+
+  const handleUploadVariantImage = (idx: number) => {
+    openCloudinaryUploadWidget({
+      multiple: false,
+      folder: 'purnimacart/variants',
+      onSuccess: (result) => {
+        updateVariant(idx, { image: result.secureUrl });
+      },
+      onError: (message) => onToast(message, 'info'),
+    });
+  };
 
   const isValid =
     form.name.trim() &&
@@ -139,7 +150,7 @@ function ProductFormModal({
         stock: Number(form.stock),
         sku: form.sku.trim(),
         brand: form.brand.trim(),
-        variants: form.variants.filter((v) => v.size || v.color),
+        variants: form.variants.filter((v) => v.color),
         returnWindow: form.returnWindow,
         rating: initial?.rating ?? 0,
         reviewCount: initial?.reviewCount ?? 0,
@@ -315,29 +326,76 @@ function ProductFormModal({
               </button>
             </div>
             {form.variants.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {form.variants.map((v, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <input
-                      placeholder="Size"
-                      value={v.size || ''}
-                      onChange={(e) => updateVariant(idx, { size: e.target.value })}
-                      className="flex-1 bg-[#fff8f7] border border-[#e8bcb7]/20 rounded-lg px-2.5 py-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                    />
-                    <input
-                      placeholder="Color"
-                      value={v.color || ''}
-                      onChange={(e) => updateVariant(idx, { color: e.target.value })}
-                      className="flex-1 bg-[#fff8f7] border border-[#e8bcb7]/20 rounded-lg px-2.5 py-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                    />
-                    <input
-                      type="number" min="0" placeholder="Stock"
-                      value={v.stock ?? 0}
-                      onChange={(e) => updateVariant(idx, { stock: Number(e.target.value) })}
-                      className="w-20 bg-[#fff8f7] border border-[#e8bcb7]/20 rounded-lg px-2.5 py-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                    />
-                    <button type="button" onClick={() => removeVariant(idx)} className="text-[#5e3f3b]/40 hover:text-red-500 cursor-pointer">
-                      <X size={14} />
+                  <div key={idx} className="flex items-center gap-3 bg-[#fff8f7]/50 p-3 rounded-xl border border-[#e8bcb7]/15">
+                    {/* Variant Image Upload/Preview */}
+                    <div className="shrink-0">
+                      {v.image ? (
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-[#e8bcb7]/20 group">
+                          <img src={v.image} alt="" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => updateVariant(idx, { image: '' })}
+                            className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-[10px] font-bold"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleUploadVariantImage(idx)}
+                          className="w-12 h-12 rounded-lg border-2 border-dashed border-[#e8bcb7]/35 flex flex-col items-center justify-center text-[#5e3f3b]/50 hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                          title="Upload variant image"
+                        >
+                          <ImagePlus size={14} />
+                          <span className="text-[8px] font-bold mt-0.5">Image</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Color Input */}
+                    <div className="flex-1 min-w-0">
+                      <input
+                        placeholder="Color Name"
+                        value={v.color || ''}
+                        onChange={(e) => updateVariant(idx, { color: e.target.value })}
+                        className="w-full bg-white border border-[#e8bcb7]/20 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-primary font-semibold text-[#291715]"
+                        required
+                      />
+                    </div>
+
+                    {/* Price Override (Optional) */}
+                    <div className="w-24">
+                      <input
+                        type="number" min="0" step="0.01"
+                        placeholder="Price (₹)"
+                        value={v.price !== undefined ? v.price : ''}
+                        onChange={(e) => updateVariant(idx, { price: e.target.value ? Number(e.target.value) : undefined })}
+                        className="w-full bg-white border border-[#e8bcb7]/20 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-primary text-[#291715]"
+                      />
+                    </div>
+
+                    {/* Stock Input */}
+                    <div className="w-20">
+                      <input
+                        type="number" min="0" step="1"
+                        placeholder="Stock"
+                        value={v.stock ?? 0}
+                        onChange={(e) => updateVariant(idx, { stock: Number(e.target.value) })}
+                        className="w-full bg-white border border-[#e8bcb7]/20 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-primary text-[#291715]"
+                        required
+                      />
+                    </div>
+
+                    {/* Remove Button */}
+                    <button 
+                      type="button" 
+                      onClick={() => removeVariant(idx)} 
+                      className="text-[#5e3f3b]/40 hover:text-red-500 cursor-pointer shrink-0"
+                    >
+                      <X size={15} />
                     </button>
                   </div>
                 ))}

@@ -38,7 +38,7 @@ interface HeaderProps {
   selectedCategory: string;
   isFiveMinActive: boolean;
   onFiveMinClick: () => void;
-  onAddToCart: (product: Product, e: React.MouseEvent) => void;
+  onAddToCart: (product: Product, color: string | undefined, price: number | undefined, e: React.MouseEvent) => void;
   onToggleWishlist: (product: Product, e: React.MouseEvent) => void;
   isWishlisted: (id: string) => boolean;
 }

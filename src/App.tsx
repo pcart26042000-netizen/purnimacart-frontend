@@ -284,9 +284,14 @@ export default function App() {
 
   // Cart operations â€” Firestore-backed for signed-in users, localStorage
   // staging for guests (merged into Firestore automatically on login).
-  const handleAddToCart = async (product: Product, quantity = 1, color = 'Classic', size = 'Standard') => {
+  const handleAddToCart = async (product: Product, quantity = 1, color = 'Classic', size = 'Standard', priceOverride?: number, imageOverride?: string) => {
     try {
-      await addToCartFs(product, quantity, color, size);
+      const modifiedProduct = {
+        ...product,
+        price: priceOverride !== undefined ? priceOverride : product.price,
+        image: imageOverride || product.image,
+      };
+      await addToCartFs(modifiedProduct, quantity, color, size);
       triggerToast(`Added ${quantity}x ${product.name} to Cart!`);
     } catch (error: any) {
       console.error(error);
@@ -294,9 +299,14 @@ export default function App() {
     }
   };
 
-  const handleBuyNow = async (product: Product, quantity = 1, color = 'Classic', size = 'Standard') => {
+  const handleBuyNow = async (product: Product, quantity = 1, color = 'Classic', size = 'Standard', priceOverride?: number, imageOverride?: string) => {
     try {
-      await addToCartFs(product, quantity, color, size);
+      const modifiedProduct = {
+        ...product,
+        price: priceOverride !== undefined ? priceOverride : product.price,
+        image: imageOverride || product.image,
+      };
+      await addToCartFs(modifiedProduct, quantity, color, size);
       setCurrentPage('checkout');
     } catch (error: any) {
       console.error(error);
@@ -488,9 +498,9 @@ export default function App() {
         selectedCategory={selectedCategory}
         isFiveMinActive={isFiveMinActive}
         onFiveMinClick={handleFiveMinClick}
-        onAddToCart={(product, e) => {
+        onAddToCart={(product, color, price, e) => {
           e?.stopPropagation();
-          handleAddToCart(product);
+          handleAddToCart(product, 1, color || 'Classic', 'Standard', price);
         }}
         onToggleWishlist={(product, e) => {
           e?.stopPropagation();
@@ -624,9 +634,9 @@ export default function App() {
                       setSelectedProductId(id);
                       setCurrentPage('product-detail');
                     }}
-                    onAddToCart={(p, e) => {
+                    onAddToCart={(p, color, price, e) => {
                       e.stopPropagation();
-                      handleAddToCart(p);
+                      handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
                     }}
                     isWishlisted={isWishlisted(product.id)}
                     onToggleWishlist={(p, e) => {
@@ -897,9 +907,9 @@ export default function App() {
                       setSelectedProductId(id);
                       setCurrentPage('product-detail');
                     }}
-                    onAddToCart={(p, e) => {
+                    onAddToCart={(p, color, price, e) => {
                       e.stopPropagation();
-                      handleAddToCart(p);
+                      handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
                     }}
                     isWishlisted={isWishlisted(product.id)}
                     onToggleWishlist={(p, e) => {
@@ -962,9 +972,9 @@ export default function App() {
                       setSelectedProductId(id);
                       setCurrentPage('product-detail');
                     }}
-                    onAddToCart={(p, e) => {
+                    onAddToCart={(p, color, price, e) => {
                       e.stopPropagation();
-                      handleAddToCart(p);
+                      handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
                     }}
                     isWishlisted={true}
                     onToggleWishlist={(p, e) => {

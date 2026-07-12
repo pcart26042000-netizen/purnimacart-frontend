@@ -118,18 +118,18 @@ export default function Header({
     <>
       <header className="sticky top-0 z-40 text-white shadow-[0_18px_40px_var(--brand-header-shadow)] transition-all" style={{ background: `linear-gradient(to bottom, var(--brand-header-start), var(--brand-header-mid), var(--brand-header-end))` }}>
         {/* Row 1: Logo + Icon actions */}
-        <div className="flex items-center justify-between w-full px-4 md:px-6 max-w-7xl mx-auto h-12 md:h-16 gap-3">
+        <div className="flex items-center justify-between w-full px-4 md:px-6 max-w-7xl mx-auto h-[60px] md:h-16 gap-3">
           <button
             onClick={() => handleNavClick('home')}
             className="flex items-center gap-2 hover:opacity-95 cursor-pointer"
             id="brand-logo"
           >
-            <img src={logoImg} alt="PCart" className="h-7 md:h-8 w-auto rounded-sm object-contain border border-white/20" />
+            <img src={logoImg} alt="PCart" className="h-9 md:h-8 w-auto rounded-sm object-contain border border-white/20" />
             <div className="flex flex-col items-start leading-none shrink-0">
-              <span className="font-sans text-base md:text-lg font-black italic tracking-tight text-white flex items-center">
+              <span className="font-sans text-lg md:text-lg font-black italic tracking-tight text-white flex items-center">
                 P<span className="text-white">Cart</span>
               </span>
-              <span className="text-[9px] font-bold italic text-white/90 flex items-center gap-0.5 mt-0.5 self-end">
+              <span className="text-[10px] font-bold italic text-white/90 flex items-center gap-0.5 mt-0.5 self-end">
                 Explore <span className="text-white font-black">Plus</span>
               </span>
             </div>
@@ -187,43 +187,43 @@ export default function Header({
             {/* Mobile search trigger */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
               aria-label="Search"
             >
-              <Search size={18} />
+              <Search size={20} />
             </button>
 
             <button
               onClick={() => handleNavClick('wishlist')}
-              className="relative w-9 h-9 hidden sm:flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+              className="relative w-10 h-10 hidden sm:flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
               title="Wishlist"
               id="wishlist-header-btn"
             >
-              <Heart size={18} className={currentPage === 'wishlist' ? 'fill-white text-white' : ''} />
+              <Heart size={20} className={currentPage === 'wishlist' ? 'fill-white text-white' : ''} />
               {wishlistCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-white text-[var(--brand-primary)] text-[9px] font-black rounded-full flex items-center justify-center border border-[var(--brand-primary)] shadow-sm">
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-white text-[var(--brand-primary)] text-[10px] font-black rounded-full flex items-center justify-center border border-[var(--brand-primary)] shadow-sm">
                   {wishlistCount}
                 </span>
               )}
             </button>
 
             <button
-              className="relative w-9 h-9 hidden sm:flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+              className="relative w-10 h-10 hidden sm:flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
               aria-label="Notifications"
             >
-              <Bell size={18} />
+              <Bell size={20} />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-white rounded-full ring-1 ring-primary" />
             </button>
 
             <button
               onClick={openCart}
-              className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
               title="Shopping Cart"
               id="cart-header-btn"
             >
-              <ShoppingCart size={18} />
+              <ShoppingCart size={20} />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-white text-[var(--brand-primary)] text-[9px] font-black rounded-full flex items-center justify-center border border-[var(--brand-primary)] shadow-sm">
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-white text-[var(--brand-primary)] text-[10px] font-black rounded-full flex items-center justify-center border border-[var(--brand-primary)] shadow-sm">
                   {cartCount}
                 </span>
               )}
@@ -241,7 +241,7 @@ export default function Header({
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileMenuOpen((v) => !v)}
-                  className={`w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer overflow-hidden ${
+                  className={`w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all cursor-pointer overflow-hidden ${
                     profileMenuOpen ? 'bg-white/10' : ''
                   }`}
                   aria-label="Account menu"
@@ -249,7 +249,7 @@ export default function Header({
                   {user?.photoURL ? (
                     <img src={user.photoURL} alt={user.displayName || 'Account'} className="w-full h-full object-cover" />
                   ) : (
-                    <User size={18} />
+                    <User size={20} />
                   )}
                 </button>
 
@@ -312,19 +312,19 @@ export default function Header({
         </div>
 
         {/* Row 2: Always-visible mobile search bar with Mic icon */}
-        <div className="md:hidden px-4 pb-2.5 flex items-center gap-2">
+        <div className="md:hidden px-4 pb-3.5 flex items-center gap-2.5">
           <div
-            className="flex-1 h-9 flex items-center justify-between bg-white text-gray-400 rounded-full px-3.5 text-left text-xs active:scale-[0.99] transition-all shadow-sm border border-transparent"
+            className="flex-1 h-11 flex items-center justify-between bg-white text-gray-400 rounded-full px-4 text-left text-xs active:scale-[0.99] transition-all shadow-sm border border-transparent"
           >
             <button
               onClick={() => {
                 setStartVoiceSearchOnOpen(false);
                 setSearchOpen(true);
               }}
-              className="flex-grow flex items-center gap-2.5 text-left focus:outline-none h-full cursor-pointer"
+              className="flex-grow flex items-center gap-3 text-left focus:outline-none h-full cursor-pointer"
             >
-              <Search size={15} className="text-gray-500 shrink-0" />
-              <span className="truncate text-gray-500 text-[10px] sm:text-xs">Search products, categories...</span>
+              <Search size={18} className="text-gray-500 shrink-0" />
+              <span className="truncate text-gray-500 text-[11px] sm:text-xs font-semibold">Search products, categories...</span>
             </button>
             <button
               onClick={(e) => {
@@ -332,16 +332,16 @@ export default function Header({
                 setStartVoiceSearchOnOpen(true);
                 setSearchOpen(true);
               }}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer flex items-center justify-center"
+              className="p-1.5 hover:bg-gray-100 rounded-full transition-colors cursor-pointer flex items-center justify-center"
             >
-              <Mic size={15} className="text-gray-500 shrink-0" />
+              <Mic size={18} className="text-gray-500 shrink-0" />
             </button>
           </div>
 
           <button
             type="button"
             onClick={onFiveMinClick}
-            className={`h-9 shrink-0 bg-white rounded-[10px] px-2 flex items-center gap-1 border transition-all active:scale-95 shadow-sm cursor-pointer ${
+            className={`h-11 shrink-0 bg-white rounded-xl px-3 flex items-center gap-2 border transition-all active:scale-95 shadow-sm cursor-pointer ${
               isFiveMinActive
                 ? 'border-green-500 text-green-600 bg-green-50/50'
                 : 'border-white/20 text-[var(--brand-primary)]'
@@ -349,8 +349,8 @@ export default function Header({
           >
             <DeliveryScooterIcon />
             <div className="flex flex-col items-start leading-none text-left select-none">
-              <span className={`text-[9px] font-black tracking-tighter ${isFiveMinActive ? 'text-green-700' : 'text-[var(--brand-primary)]'}`}>5 MIN</span>
-              <span className="text-[6px] font-bold text-gray-500 tracking-wider">DELIVERY</span>
+              <span className={`text-[10px] font-black tracking-tighter ${isFiveMinActive ? 'text-green-700' : 'text-[var(--brand-primary)]'}`}>5 MIN</span>
+              <span className="text-[7px] font-bold text-gray-500 tracking-wider">DELIVERY</span>
             </div>
           </button>
         </div>

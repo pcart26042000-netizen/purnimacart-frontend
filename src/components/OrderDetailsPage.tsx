@@ -223,8 +223,8 @@ export default function OrderDetailsPage({ orderId, onBack }: OrderDetailsPagePr
                 <div className="flex-grow min-w-0">
                   <h3 className="font-semibold text-sm text-[#291715] truncate">{item.name}</h3>
                   <p className="text-[10px] text-[#5e3f3b]/70 mt-0.5">
-                    {item.variant?.color ? `Style: ${item.variant.color} · ` : ''}
-                    {item.variant?.size ? `Size: ${item.variant.size} · ` : ''}Qty: {item.qty}
+                    {(item.selectedColor || item.variant?.color) ? `Style: ${item.selectedColor || item.variant?.color} · ` : ''}
+                    {(item.selectedSize || item.variant?.size) ? `Size: ${item.selectedSize || item.variant?.size} · ` : ''}Qty: {item.qty}
                   </p>
                   <p className="text-[10px] text-emerald-600 font-semibold mt-1">7-day return window</p>
                 </div>

@@ -117,7 +117,12 @@ export interface OrderItem {
   image: string;
   price: number;
   qty: number;
-  variant?: { size?: string; color?: string };
+  variant?: {
+    color?: string;
+    size?: string;
+  };
+  selectedColor?: string;
+  selectedSize?: string;
 }
 
 export interface FirestoreOrder {

@@ -212,8 +212,8 @@ function OrderDetailModal({
                     <p className="text-xs font-semibold text-[#291715] truncate">{item.name}</p>
                     <p className="text-[10px] text-[#5e3f3b]/60">
                       Qty {item.qty}
-                      {item.variant?.size ? ` Â· ${item.variant.size}` : ''}
-                      {item.variant?.color ? ` Â· ${item.variant.color}` : ''}
+                      {(item.selectedSize || item.variant?.size) ? ` · ${item.selectedSize || item.variant?.size}` : ''}
+                      {(item.selectedColor || item.variant?.color) ? ` · ${item.selectedColor || item.variant?.color}` : ''}
                     </p>
                   </div>
                   <span className="text-xs font-bold text-[#291715] shrink-0">₹{(item.price * item.qty).toLocaleString('en-IN')}</span>

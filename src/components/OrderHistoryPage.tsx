@@ -52,7 +52,11 @@ export default function OrderHistoryPage({ uid, onSelectOrder, onBrowse }: Order
     }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      result = result.filter((o) => o.id.toLowerCase().includes(q));
+      result = result.filter(
+        (o) =>
+          o.id.toLowerCase().includes(q) ||
+          o.items.some((item) => item.name.toLowerCase().includes(q))
+      );
     }
     return result;
   }, [orders, search, statusFilter]);
@@ -69,7 +73,7 @@ export default function OrderHistoryPage({ uid, onSelectOrder, onBrowse }: Order
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5e3f3b]/40" size={15} />
           <input
             type="text"
-            placeholder="Search by Order ID"
+            placeholder="Search by Order ID or product name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-white border border-[#e8bcb7]/20 rounded-xl py-3 pl-10 pr-4 text-xs outline-none focus:ring-1 focus:ring-primary text-[#291715]"
@@ -132,7 +136,13 @@ export default function OrderHistoryPage({ uid, onSelectOrder, onBrowse }: Order
             </div>
             <div className="flex-grow min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono text-xs font-bold text-[#291715]">#{order.id.slice(0, 10)}</span>
+                <span className="text-xs sm:text-sm font-bold text-[#291715] truncate max-w-[150px] sm:max-w-[250px]">
+                  {order.items.length > 0
+                    ? (order.items.length > 1
+                        ? `${order.items[0].name} & ${order.items.length - 1} more`
+                        : order.items[0].name)
+                    : 'Order'}
+                </span>
                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${STATUS_STYLES[order.orderStatus]}`}>
                   {order.orderStatus}
                 </span>

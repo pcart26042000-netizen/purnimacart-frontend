@@ -16,6 +16,9 @@ export interface Product {
   returnWindow?: string;
   isFiveMinBadge?: boolean;
   variants?: { color?: string; image?: string; price?: number; stock?: number }[];
+  hasSizes?: boolean;
+  sizes?: { size: string; stock: number }[];
+  stock?: number;
 }
 
 export interface CartItem {

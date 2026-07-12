@@ -37,6 +37,9 @@ export function productFromFirestore(fp: FirestoreProduct): Product {
     returnWindow: fp.returnWindow,
     isFiveMinBadge: !!fp.isFiveMinBadge,
     variants: fp.variants || [],
+    hasSizes: !!fp.hasSizes,
+    sizes: fp.sizes || [],
+    stock: fp.stock || 0,
   };
 }
 

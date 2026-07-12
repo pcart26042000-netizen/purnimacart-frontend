@@ -29,14 +29,16 @@ export default function ProductDetail({
   isFiveMinActive,
 }: ProductDetailProps) {
   const hasColorVariants = !!(product.variants && product.variants.length > 0);
-  const hasSizeVariants = false;
+  const hasSizeVariants = !!product.hasSizes && !!(product.sizes && product.sizes.length > 0);
 
   const [quantity, setQuantity] = useState(1);
   const [copied, setCopied] = useState(false);
   const [selectedColor, setSelectedColor] = useState(() => {
     return product.variants && product.variants.length > 0 ? (product.variants[0].color || 'Classic') : 'Classic';
   });
-  const [selectedSize, setSelectedSize] = useState('Standard');
+  const [selectedSize, setSelectedSize] = useState(() => {
+    return product.hasSizes && product.sizes && product.sizes.length > 0 ? product.sizes[0].size : 'Standard';
+  });
   const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
   const [newReviewComment, setNewReviewComment] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(5);
@@ -69,7 +71,7 @@ export default function ProductDetail({
   };
 
   const colors = hasColorVariants ? (product.variants!.map(v => v.color).filter(Boolean) as string[]) : [];
-  const sizes: string[] = [];
+  const sizes = hasSizeVariants ? (product.sizes!.map(s => s.size).filter(Boolean) as string[]) : [];
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,10 +139,19 @@ export default function ProductDetail({
 
   useEffect(() => {
     setActiveImageIndex(-1);
-  }, [product.id, product.image, product.images]);
+    setSelectedColor(product.variants && product.variants.length > 0 ? (product.variants[0].color || 'Classic') : 'Classic');
+    setSelectedSize(product.hasSizes && product.sizes && product.sizes.length > 0 ? product.sizes[0].size : 'Standard');
+    setQuantity(1);
+  }, [product.id]);
 
   const activeImage = activeImageIndex >= 0 ? galleryImages[activeImageIndex] : (activeVariant?.image || galleryImages[0]);
   const activePrice = activeVariant?.price !== undefined ? activeVariant.price : product.price;
+
+  const activeSizeStock = React.useMemo(() => {
+    if (!hasSizeVariants || !product.sizes) return Number(product.stock) || 0;
+    const sizeObj = product.sizes.find((s) => s.size === selectedSize);
+    return sizeObj ? sizeObj.stock : 0;
+  }, [selectedSize, product.sizes, product.stock, hasSizeVariants]);
 
   const goPrevImage = () => {
     const fallbackLen = galleryImages.length;
@@ -303,14 +314,20 @@ export default function ProductDetail({
           <div className="flex gap-3">
             <button
               onClick={handleAddToCartClick}
+              disabled={activeSizeStock <= 0}
               id="add-to-cart-detail-btn"
-              className="flex-1 bg-[#ff9f00] hover:bg-[#e08c00] text-white py-4 px-4 rounded-sm font-bold text-xs uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              className={`flex-1 text-white py-4 px-4 rounded-sm font-bold text-xs uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+                activeSizeStock <= 0
+                  ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                  : 'bg-[#ff9f00] hover:bg-[#e08c00] active:scale-95'
+              }`}
             >
               <ShoppingCart size={16} />
-              Add to Cart
+              {activeSizeStock <= 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
             <button
               onClick={() => {
+                if (activeSizeStock <= 0) return;
                 if (onBuyNow) {
                   onBuyNow(
                     product,
@@ -331,9 +348,14 @@ export default function ProductDetail({
                   );
                 }
               }}
-              className="flex-1 bg-[#fb641b] hover:bg-[#e0540d] text-white py-4 px-4 rounded-sm font-bold text-xs uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              disabled={activeSizeStock <= 0}
+              className={`flex-1 text-white py-4 px-4 rounded-sm font-bold text-xs uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+                activeSizeStock <= 0
+                  ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                  : 'bg-[#fb641b] hover:bg-[#e0540d] active:scale-95'
+              }`}
             >
-              Buy Now
+              {activeSizeStock <= 0 ? 'Sold Out' : 'Buy Now'}
             </button>
           </div>
         </div>
@@ -365,7 +387,7 @@ export default function ProductDetail({
           </div>
 
           {/* Pricing Row */}
-          <div className="flex items-baseline gap-3 p-4 bg-gray-50 border border-gray-200 rounded-sm">
+          <div className="flex items-baseline gap-3 p-4 bg-gray-50 border border-gray-200 rounded-sm relative">
             <span className="text-2xl font-black text-gray-900">
               ₹{activePrice.toLocaleString('en-IN')}
             </span>
@@ -379,6 +401,22 @@ export default function ProductDetail({
                 </span>
               </>
             )}
+            
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              {activeSizeStock <= 0 ? (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-md">
+                  Out of Stock
+                </span>
+              ) : activeSizeStock <= 3 ? (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-md animate-pulse">
+                  Only {activeSizeStock} left!
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                  In Stock
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Description */}
@@ -396,22 +434,44 @@ export default function ProductDetail({
             {/* Size Selector */}
             {hasSizeVariants && sizes.length > 0 && (
               <div>
-                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-2">
-                  Select Size Option: <span className="text-primary font-black">{selectedSize}</span>
-                </span>
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Select Size: <span className="text-primary font-black">{selectedSize}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => alert("Size Chart:\nXS: 34 inch / 86 cm\nS: 36 inch / 91 cm\nM: 38 inch / 96 cm\nL: 40 inch / 101 cm\nXL: 42 inch / 106 cm\nXXL: 44 inch / 111 cm")}
+                    className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+                  >
+                    Size Chart
+                  </button>
+                </div>
                 <div className="flex gap-2 flex-wrap">
-                  {sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-sm border transition-all cursor-pointer ${selectedSize === size
-                        ? 'border-primary bg-primary text-white shadow-sm'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-primary'
+                  {sizes.map((size) => {
+                    const sizeObj = product.sizes?.find((s) => s.size === size);
+                    const sizeStock = sizeObj ? sizeObj.stock : 0;
+                    const isOutOfStock = sizeStock <= 0;
+                    const isSelected = selectedSize === size;
+
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        disabled={isOutOfStock}
+                        onClick={() => setSelectedSize(size)}
+                        className={`min-w-[44px] h-10 px-3.5 flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer select-none ${
+                          isSelected
+                            ? 'border-primary bg-primary text-white shadow-sm active:scale-95'
+                            : isOutOfStock
+                            ? 'border-gray-250 bg-gray-50/50 text-gray-300 line-through cursor-not-allowed'
+                            : 'border-gray-200 bg-white text-gray-800 hover:border-primary hover:text-primary active:scale-95'
                         }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                        title={isOutOfStock ? `${size} (Out of Stock)` : `${size} (${sizeStock} left)`}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -431,9 +491,9 @@ export default function ProductDetail({
                   {quantity}
                 </span>
                 <button
-                  onClick={() => setQuantity(Math.min(5, quantity + 1))}
-                  className={`px-3 py-1 text-gray-500 font-bold text-sm select-none ${quantity >= 5 ? 'opacity-30 cursor-not-allowed' : 'hover:text-primary cursor-pointer'}`}
-                  disabled={quantity >= 5}
+                  onClick={() => setQuantity(Math.min(Math.min(activeSizeStock, 5), quantity + 1))}
+                  className={`px-3 py-1 text-gray-500 font-bold text-sm select-none ${quantity >= Math.min(activeSizeStock, 5) ? 'opacity-30 cursor-not-allowed' : 'hover:text-primary cursor-pointer'}`}
+                  disabled={quantity >= Math.min(activeSizeStock, 5)}
                 >
                   +
                 </button>

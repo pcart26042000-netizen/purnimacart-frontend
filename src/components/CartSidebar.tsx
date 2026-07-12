@@ -165,16 +165,25 @@ export default function CartSidebar({
                         <span className="px-3 text-xs font-bold text-[#291715]">
                           {item.quantity}
                         </span>
-                        <button
-                          onClick={() => {
-                            if (item.quantity >= 5) return;
-                            onUpdateQuantity(item.product.id, item.quantity + 1, item.selectedColor, item.selectedSize);
-                          }}
-                          className={`px-2 py-1 text-xs font-bold ${item.quantity >= 5 ? 'text-gray-300 cursor-not-allowed' : 'text-[#5e3f3b] hover:text-primary hover:bg-[#fff0ee]'}`}
-                          disabled={item.quantity >= 5}
-                        >
-                          <Plus size={10} />
-                        </button>
+                        {(() => {
+                          const maxStockLimit = item.product.hasSizes && item.selectedSize
+                            ? (item.product.sizes?.find((s) => s.size === item.selectedSize)?.stock ?? 5)
+                            : 5;
+                          const isIncrementDisabled = item.quantity >= Math.min(5, maxStockLimit);
+
+                          return (
+                            <button
+                              onClick={() => {
+                                if (item.quantity >= Math.min(5, maxStockLimit)) return;
+                                onUpdateQuantity(item.product.id, item.quantity + 1, item.selectedColor, item.selectedSize);
+                              }}
+                              className={`px-2 py-1 text-xs font-bold ${isIncrementDisabled ? 'text-gray-300 cursor-not-allowed' : 'text-[#5e3f3b] hover:text-primary hover:bg-[#fff0ee]'}`}
+                              disabled={isIncrementDisabled}
+                            >
+                              <Plus size={10} />
+                            </button>
+                          );
+                        })()}
                       </div>
 
                       {/* Item Price */}

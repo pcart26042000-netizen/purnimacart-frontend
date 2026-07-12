@@ -28,6 +28,11 @@ export interface ProductVariant {
   stock?: number;
 }
 
+export interface SizeVariant {
+  size: string;
+  stock: number;
+}
+
 export interface FirestoreProduct {
   id: string;
   name: string;
@@ -40,6 +45,8 @@ export interface FirestoreProduct {
   sku: string;
   brand?: string;
   variants: ProductVariant[];
+  hasSizes?: boolean;
+  sizes?: SizeVariant[];
   returnWindow: ReturnWindow;
   rating: number;
   reviewCount: number;

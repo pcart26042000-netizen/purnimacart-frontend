@@ -305,6 +305,16 @@ export default function App() {
         return;
       }
 
+      // Check stock limit for selected size variant
+      if (product.hasSizes && size) {
+        const sizeObj = product.sizes?.find((s) => s.size === size);
+        const maxStock = sizeObj ? sizeObj.stock : 0;
+        if (currentQty + quantity > maxStock) {
+          triggerToast(`Only ${maxStock} items left in stock for size ${size}.`, 'info');
+          return;
+        }
+      }
+
       const modifiedProduct = {
         ...product,
         price: priceOverride !== undefined ? priceOverride : product.price,
@@ -331,6 +341,17 @@ export default function App() {
         triggerToast(`You can only order a maximum of 5 quantities of this product.`, 'info');
         return;
       }
+
+      // Check stock limit for selected size variant
+      if (product.hasSizes && size) {
+        const sizeObj = product.sizes?.find((s) => s.size === size);
+        const maxStock = sizeObj ? sizeObj.stock : 0;
+        if (currentQty + quantity > maxStock) {
+          triggerToast(`Only ${maxStock} items left in stock for size ${size}.`, 'info');
+          return;
+        }
+      }
+
       const modifiedProduct = {
         ...product,
         price: priceOverride !== undefined ? priceOverride : product.price,
@@ -350,6 +371,18 @@ export default function App() {
         triggerToast('You can only order a maximum of 5 quantities of this product.', 'info');
         return;
       }
+
+      // Check stock limit for selected size variant
+      const product = PRODUCTS.find((p) => p.id === productId);
+      if (product && product.hasSizes && size) {
+        const sizeObj = product.sizes?.find((s) => s.size === size);
+        const maxStock = sizeObj ? sizeObj.stock : 0;
+        if (quantity > maxStock) {
+          triggerToast(`Only ${maxStock} items left in stock for size ${size}.`, 'info');
+          return;
+        }
+      }
+
       await updateCartQuantityFs(productId, quantity, color, size);
     } catch (error: any) {
       console.error(error);

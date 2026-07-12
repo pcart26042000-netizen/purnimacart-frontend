@@ -33,6 +33,8 @@ type ProductFormState = {
   isFiveMinBadge: boolean;
   images: string[];
   variants: ProductVariant[];
+  hasSizes: boolean;
+  sizes: { size: string; stock: number }[];
 };
 
 const EMPTY_FORM: ProductFormState = {
@@ -51,6 +53,8 @@ const EMPTY_FORM: ProductFormState = {
   isFiveMinBadge: false,
   images: [],
   variants: [],
+  hasSizes: false,
+  sizes: [],
 };
 
 function toFormState(p: FirestoreProduct): ProductFormState {
@@ -70,6 +74,8 @@ function toFormState(p: FirestoreProduct): ProductFormState {
     isFiveMinBadge: !!p.isFiveMinBadge,
     images: p.images,
     variants: p.variants || [],
+    hasSizes: !!p.hasSizes,
+    sizes: p.sizes || [],
   };
 }
 
@@ -112,6 +118,11 @@ function ProductFormModal({
     set('variants', form.variants.map((v, i) => (i === idx ? { ...v, ...patch } : v)));
   const removeVariant = (idx: number) => set('variants', form.variants.filter((_, i) => i !== idx));
 
+  const addSize = () => set('sizes', [...form.sizes, { size: '', stock: 1 }]);
+  const updateSize = (idx: number, patch: Partial<{ size: string; stock: number }>) =>
+    set('sizes', form.sizes.map((s, i) => (i === idx ? { ...s, ...patch } : s)));
+  const removeSize = (idx: number) => set('sizes', form.sizes.filter((_, i) => i !== idx));
+
   const handleUploadVariantImage = (idx: number) => {
     openCloudinaryUploadWidget({
       multiple: false,
@@ -140,6 +151,10 @@ function ProductFormModal({
     }
     setSaving(true);
     try {
+      const computedStock = form.hasSizes
+        ? form.sizes.reduce((acc, s) => acc + (Number(s.stock) || 0), 0)
+        : Number(form.stock);
+
       const payload = {
         name: form.name.trim(),
         description: form.description.trim(),
@@ -147,10 +162,12 @@ function ProductFormModal({
         price: Number(form.price),
         offerPrice: form.offerPrice ? Number(form.offerPrice) : null,
         images: form.images,
-        stock: Number(form.stock),
+        stock: computedStock,
         sku: form.sku.trim(),
         brand: form.brand.trim(),
         variants: form.variants.filter((v) => v.color),
+        hasSizes: form.hasSizes,
+        sizes: form.hasSizes ? form.sizes.filter((s) => s.size) : [],
         returnWindow: form.returnWindow,
         rating: initial?.rating ?? 0,
         reviewCount: initial?.reviewCount ?? 0,
@@ -399,6 +416,76 @@ function ProductFormModal({
                     </button>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+          {/* Sizes Customizer */}
+          <div className="border-t border-[#e8bcb7]/15 pt-4">
+            <Toggle
+              checked={form.hasSizes}
+              onChange={(v) => {
+                set('hasSizes', v);
+                if (v && form.sizes.length === 0) {
+                  set('sizes', [
+                    { size: 'XS', stock: 10 },
+                    { size: 'S', stock: 10 },
+                    { size: 'M', stock: 10 },
+                    { size: 'L', stock: 10 },
+                    { size: 'XL', stock: 10 },
+                    { size: 'XXL', stock: 10 }
+                  ]);
+                }
+              }}
+              label="Enable Size Options (for Clothing/Apparel)"
+            />
+            
+            {form.hasSizes && (
+              <div className="mt-3 bg-[#fff8f7]/40 p-4 rounded-2xl border border-[#e8bcb7]/15 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black uppercase tracking-wide text-[#5e3f3b]">Configure Sizes</label>
+                  <button type="button" onClick={addSize} className="text-[10px] font-bold bg-primary text-white px-2.5 py-1 rounded-lg hover:bg-[#9a000e] cursor-pointer">
+                    + Add Size Option
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {form.sizes.map((s, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-[#e8bcb7]/10">
+                      <div className="flex-1">
+                        <input
+                          placeholder="e.g. XS, S, M, L, XL"
+                          value={s.size}
+                          onChange={(e) => updateSize(idx, { size: e.target.value.toUpperCase() })}
+                          className="w-full bg-[#fff8f7] border border-[#e8bcb7]/15 rounded-lg px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-primary font-bold text-[#291715]"
+                          required
+                        />
+                      </div>
+                      <div className="w-20">
+                        <input
+                          type="number" min="0" step="1"
+                          placeholder="Stock"
+                          value={s.stock}
+                          onChange={(e) => updateSize(idx, { stock: Number(e.target.value) })}
+                          className="w-full bg-[#fff8f7] border border-[#e8bcb7]/15 rounded-lg px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-primary text-[#291715] font-semibold"
+                          required
+                        />
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => removeSize(idx)} 
+                        className="text-[#5e3f3b]/40 hover:text-red-500 cursor-pointer px-1"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                
+                {form.sizes.length > 0 && (
+                  <p className="text-[10px] text-[#5e3f3b]/70 font-semibold italic mt-1 bg-white p-2 rounded-lg border border-dashed border-[#e8bcb7]/20">
+                    * Total item stock will be dynamically computed as the sum of all configurations: <strong>{form.sizes.reduce((acc, s) => acc + (Number(s.stock) || 0), 0)}</strong>.
+                  </p>
+                )}
               </div>
             )}
           </div>

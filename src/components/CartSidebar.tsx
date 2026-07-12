@@ -157,7 +157,8 @@ export default function CartSidebar({
                       <div className="flex items-center border border-[#e8bcb7]/35 rounded-lg bg-white overflow-hidden">
                         <button
                           onClick={() => onUpdateQuantity(item.product.id, Math.max(1, item.quantity - 1), item.selectedColor, item.selectedSize)}
-                          className="px-2 py-1 text-xs text-[#5e3f3b] hover:text-primary hover:bg-[#fff0ee] font-bold"
+                          className={`px-2 py-1 text-xs font-bold ${item.quantity <= 1 ? 'text-gray-300 cursor-not-allowed' : 'text-[#5e3f3b] hover:text-primary hover:bg-[#fff0ee]'}`}
+                          disabled={item.quantity <= 1}
                         >
                           <Minus size={10} />
                         </button>
@@ -165,8 +166,12 @@ export default function CartSidebar({
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1, item.selectedColor, item.selectedSize)}
-                          className="px-2 py-1 text-xs text-[#5e3f3b] hover:text-primary hover:bg-[#fff0ee] font-bold"
+                          onClick={() => {
+                            if (item.quantity >= 5) return;
+                            onUpdateQuantity(item.product.id, item.quantity + 1, item.selectedColor, item.selectedSize);
+                          }}
+                          className={`px-2 py-1 text-xs font-bold ${item.quantity >= 5 ? 'text-gray-300 cursor-not-allowed' : 'text-[#5e3f3b] hover:text-primary hover:bg-[#fff0ee]'}`}
+                          disabled={item.quantity >= 5}
                         >
                           <Plus size={10} />
                         </button>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, ChevronLeft, ChevronRight, Heart, ShoppingCart, ShieldCheck, Truck, RefreshCw, Send, Star } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Heart, ShoppingCart, ShieldCheck, Truck, RefreshCw, Send, Star, Share2 } from 'lucide-react';
 import { Product, Review } from '../types';
 import { MOCK_REVIEWS } from '../data';
 import ProductCard from './ProductCard';
@@ -32,6 +32,7 @@ export default function ProductDetail({
   const hasSizeVariants = false;
 
   const [quantity, setQuantity] = useState(1);
+  const [copied, setCopied] = useState(false);
   const [selectedColor, setSelectedColor] = useState(() => {
     return product.variants && product.variants.length > 0 ? (product.variants[0].color || 'Classic') : 'Classic';
   });
@@ -40,6 +41,32 @@ export default function ProductDetail({
   const [newReviewComment, setNewReviewComment] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [newReviewUser, setNewReviewUser] = useState('');
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/?product=${product.id}`;
+    const shareTitle = product.name;
+    const shareText = `Check out this amazing product on PurnimaCart: ${product.name}!`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    }
+  };
 
   const colors = hasColorVariants ? (product.variants!.map(v => v.color).filter(Boolean) as string[]) : [];
   const sizes: string[] = [];
@@ -151,6 +178,43 @@ export default function ProductDetail({
         <div className="lg:col-span-5 space-y-4 px-0 md:px-0">
           <div className="space-y-3">
             <div className="aspect-[4/3] w-full rounded-none md:rounded-xl overflow-hidden bg-gradient-to-b from-[#f8fbff] to-white border-0 md:border md:border-gray-200 shadow-none md:shadow-sm relative flex items-center justify-center p-2 md:p-6 h-[260px] md:h-[350px] group">
+              {/* Mobile overlay action buttons */}
+              <div className="absolute top-3 left-3 z-10 md:hidden">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="w-9 h-9 rounded-full bg-white/95 backdrop-blur-sm border border-[#e8bcb7]/20 shadow flex items-center justify-center text-[#291715] active:scale-90 transition-all cursor-pointer"
+                  aria-label="Back"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+              </div>
+
+              <div className="absolute top-3 right-3 z-10 md:hidden flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => onToggleWishlist(product)}
+                  className="w-9 h-9 rounded-full bg-white/95 backdrop-blur-sm border border-[#e8bcb7]/20 shadow flex items-center justify-center text-[#291715] active:scale-90 transition-all cursor-pointer"
+                  aria-label="Toggle Wishlist"
+                >
+                  <Heart size={16} className={isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="w-9 h-9 rounded-full bg-white/95 backdrop-blur-sm border border-[#e8bcb7]/20 shadow flex items-center justify-center text-[#291715] active:scale-90 transition-all cursor-pointer"
+                  aria-label="Share product"
+                >
+                  <Share2 size={16} className="text-gray-600" />
+                </button>
+              </div>
+
+              {copied && (
+                <div className="absolute top-16 right-3 bg-gray-900/90 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg z-20 animate-bounce">
+                  Link copied!
+                </div>
+              )}
+
               <img
                 src={activeImage}
                 alt={product.name}
@@ -358,7 +422,8 @@ export default function ProductDetail({
               <div className="flex items-center border border-gray-300 rounded-sm bg-white overflow-hidden h-9">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-1 text-gray-500 hover:text-primary font-bold text-sm cursor-pointer"
+                  className={`px-3 py-1 text-gray-500 font-bold text-sm select-none ${quantity <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:text-primary cursor-pointer'}`}
+                  disabled={quantity <= 1}
                 >
                   -
                 </button>
@@ -366,8 +431,9 @@ export default function ProductDetail({
                   {quantity}
                 </span>
                 <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="px-3 py-1 text-gray-500 hover:text-primary font-bold text-sm cursor-pointer"
+                  onClick={() => setQuantity(Math.min(5, quantity + 1))}
+                  className={`px-3 py-1 text-gray-500 font-bold text-sm select-none ${quantity >= 5 ? 'opacity-30 cursor-not-allowed' : 'hover:text-primary cursor-pointer'}`}
+                  disabled={quantity >= 5}
                 >
                   +
                 </button>

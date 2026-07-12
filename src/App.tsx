@@ -251,12 +251,18 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [currentPage, selectedProductId]);
 
-  // Simple path-based routing for Admin Panel
+  // Path-based and query deep-link routing for Admin Panel and product shares
   useEffect(() => {
     const checkPath = () => {
       const path = window.location.pathname;
+      const params = new URLSearchParams(window.location.search);
+      const prodId = params.get('product');
+
       if (path.startsWith('/admin')) {
         setCurrentPage('admin');
+      } else if (prodId) {
+        setSelectedProductId(prodId);
+        setCurrentPage('product-detail');
       } else if (path === '/' && currentPage === 'admin') {
         setCurrentPage('home');
       }
@@ -287,6 +293,18 @@ export default function App() {
   // staging for guests (merged into Firestore automatically on login).
   const handleAddToCart = async (product: Product, quantity = 1, color = 'Classic', size = 'Standard', priceOverride?: number, imageOverride?: string) => {
     try {
+      const existing = cartItems.find(
+        (item) =>
+          item.product.id === product.id &&
+          (item.selectedColor || 'Classic') === color &&
+          (item.selectedSize || 'Standard') === size
+      );
+      const currentQty = existing ? existing.quantity : 0;
+      if (currentQty + quantity > 5) {
+        triggerToast(`You can only add a maximum of 5 quantities of this product.`, 'info');
+        return;
+      }
+
       const modifiedProduct = {
         ...product,
         price: priceOverride !== undefined ? priceOverride : product.price,
@@ -302,6 +320,17 @@ export default function App() {
 
   const handleBuyNow = async (product: Product, quantity = 1, color = 'Classic', size = 'Standard', priceOverride?: number, imageOverride?: string) => {
     try {
+      const existing = cartItems.find(
+        (item) =>
+          item.product.id === product.id &&
+          (item.selectedColor || 'Classic') === color &&
+          (item.selectedSize || 'Standard') === size
+      );
+      const currentQty = existing ? existing.quantity : 0;
+      if (currentQty + quantity > 5) {
+        triggerToast(`You can only order a maximum of 5 quantities of this product.`, 'info');
+        return;
+      }
       const modifiedProduct = {
         ...product,
         price: priceOverride !== undefined ? priceOverride : product.price,
@@ -317,6 +346,10 @@ export default function App() {
 
   const handleUpdateCartQuantity = async (productId: string, quantity: number, color?: string, size?: string) => {
     try {
+      if (quantity > 5) {
+        triggerToast('You can only order a maximum of 5 quantities of this product.', 'info');
+        return;
+      }
       await updateCartQuantityFs(productId, quantity, color, size);
     } catch (error: any) {
       console.error(error);

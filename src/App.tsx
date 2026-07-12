@@ -472,10 +472,10 @@ export default function App() {
   }
 
   return (
-    <div className="bg-[var(--brand-soft-surface)] text-[#291715] font-sans min-h-screen selection:bg-primary/20 selection:text-primary pb-16 md:pb-0">
+    <div className="bg-[var(--brand-soft-surface)] text-[#291715] font-sans min-h-screen selection:bg-primary/20 selection:text-primary pb-[92px] md:pb-0">
       {/* Dynamic Toast Feedback Notification */}
       {showToast && (
-        <div className="fixed bottom-20 md:bottom-8 right-6 z-[1000] bg-white rounded-2xl shadow-2xl border border-[var(--brand-soft-border)] p-4 max-w-sm flex items-center gap-3 animate-bounce">
+        <div className="fixed bottom-[96px] md:bottom-8 right-6 z-[1000] bg-white rounded-2xl shadow-2xl border border-[var(--brand-soft-border)] p-4 max-w-sm flex items-center gap-3 animate-bounce">
           <div className="bg-primary/10 text-primary p-2 rounded-xl">
             <Sparkles size={18} />
           </div>
@@ -1158,7 +1158,7 @@ export default function App() {
       />
 
       {/* Bottom Sticky Mobile Nav Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-[var(--brand-soft-surface)] backdrop-blur-md border-t border-[#e8bcb7]/20 shadow-xl h-[72px]">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pt-2 pb-5 bg-[var(--brand-soft-surface)] backdrop-blur-md border-t border-[#e8bcb7]/20 shadow-xl h-[84px]">
         <button
           onClick={() => {
             setCurrentPage('home');

@@ -118,13 +118,13 @@ export default function Header({
     <>
       <header className="sticky top-0 z-40 text-white shadow-[0_18px_40px_var(--brand-header-shadow)] transition-all" style={{ background: `linear-gradient(to bottom, var(--brand-header-start), var(--brand-header-mid), var(--brand-header-end))` }}>
         {/* Row 1: Logo + Icon actions */}
-        <div className="flex items-center justify-between w-full px-4 md:px-6 max-w-7xl mx-auto h-14 md:h-16 gap-3">
+        <div className="flex items-center justify-between w-full px-4 md:px-6 max-w-7xl mx-auto h-12 md:h-16 gap-3">
           <button
             onClick={() => handleNavClick('home')}
             className="flex items-center gap-2 hover:opacity-95 cursor-pointer"
             id="brand-logo"
           >
-            <img src={logoImg} alt="PCart" className="h-8 w-auto rounded-sm object-contain border border-white/20" />
+            <img src={logoImg} alt="PCart" className="h-7 md:h-8 w-auto rounded-sm object-contain border border-white/20" />
             <div className="flex flex-col items-start leading-none shrink-0">
               <span className="font-sans text-base md:text-lg font-black italic tracking-tight text-white flex items-center">
                 P<span className="text-white">Cart</span>
@@ -312,18 +312,18 @@ export default function Header({
         </div>
 
         {/* Row 2: Always-visible mobile search bar with Mic icon */}
-        <div className="md:hidden px-4 pb-3 flex items-center gap-2">
+        <div className="md:hidden px-4 pb-2.5 flex items-center gap-2">
           <div
-            className="flex-1 h-10 flex items-center justify-between bg-white text-gray-400 rounded-[20px] px-4 text-left text-xs active:scale-[0.99] transition-all shadow-sm border border-transparent"
+            className="flex-1 h-9 flex items-center justify-between bg-white text-gray-400 rounded-full px-3.5 text-left text-xs active:scale-[0.99] transition-all shadow-sm border border-transparent"
           >
             <button
               onClick={() => {
                 setStartVoiceSearchOnOpen(false);
                 setSearchOpen(true);
               }}
-              className="flex-grow flex items-center gap-3 text-left focus:outline-none h-full cursor-pointer"
+              className="flex-grow flex items-center gap-2.5 text-left focus:outline-none h-full cursor-pointer"
             >
-              <Search size={16} className="text-gray-500 shrink-0" />
+              <Search size={15} className="text-gray-500 shrink-0" />
               <span className="truncate text-gray-500 text-[10px] sm:text-xs">Search products, categories...</span>
             </button>
             <button
@@ -334,14 +334,14 @@ export default function Header({
               }}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer flex items-center justify-center"
             >
-              <Mic size={16} className="text-gray-500 shrink-0" />
+              <Mic size={15} className="text-gray-500 shrink-0" />
             </button>
           </div>
 
           <button
             type="button"
             onClick={onFiveMinClick}
-            className={`h-10 shrink-0 bg-white rounded-[12px] px-2.5 flex items-center gap-1.5 border transition-all active:scale-95 shadow-sm cursor-pointer ${
+            className={`h-9 shrink-0 bg-white rounded-[10px] px-2 flex items-center gap-1 border transition-all active:scale-95 shadow-sm cursor-pointer ${
               isFiveMinActive
                 ? 'border-green-500 text-green-600 bg-green-50/50'
                 : 'border-white/20 text-[var(--brand-primary)]'
@@ -349,8 +349,8 @@ export default function Header({
           >
             <DeliveryScooterIcon />
             <div className="flex flex-col items-start leading-none text-left select-none">
-              <span className={`text-[10px] font-black tracking-tighter ${isFiveMinActive ? 'text-green-700' : 'text-[var(--brand-primary)]'}`}>5 MIN</span>
-              <span className="text-[7px] font-bold text-gray-500 tracking-wider">DELIVERY</span>
+              <span className={`text-[9px] font-black tracking-tighter ${isFiveMinActive ? 'text-green-700' : 'text-[var(--brand-primary)]'}`}>5 MIN</span>
+              <span className="text-[6px] font-bold text-gray-500 tracking-wider">DELIVERY</span>
             </div>
           </button>
         </div>

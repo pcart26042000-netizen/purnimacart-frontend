@@ -595,22 +595,48 @@ export default function ProductDetail({
                 No reviews yet. Be the first to share your thoughts!
               </div>
             ) : (
-              reviews.map((review) => (
-                <div key={review.id} className="p-4 bg-white border border-gray-200 rounded-sm shadow-sm">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h5 className="font-bold text-xs text-gray-900">{review.userName}</h5>
-                      <span className="text-[10px] text-gray-400 block mt-0.5">{review.date}</span>
+              reviews.map((review) => {
+                const initial = review.userName?.[0]?.toUpperCase() || '?';
+                return (
+                  <div key={review.id} className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 flex gap-4">
+                    {/* User Avatar Circle */}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-[#ff9f00] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm select-none">
+                      {initial}
                     </div>
-                    <span className="bg-[#388e3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5">
-                      {review.rating} <span className="text-[8px]">★</span>
-                    </span>
+
+                    {/* Review Content */}
+                    <div className="flex-grow min-w-0 space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div>
+                          <h5 className="font-bold text-xs text-gray-900 flex items-center gap-2 flex-wrap">
+                            {review.userName}
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100/50 px-2 py-0.5 rounded-full select-none">
+                              ✓ Verified Buyer
+                            </span>
+                          </h5>
+                          <span className="text-[10px] text-gray-400 font-medium mt-0.5 block">{review.date}</span>
+                        </div>
+
+                        {/* Star Rating Display */}
+                        <div className="flex gap-0.5 items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={12}
+                              className={star <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Comment text */}
+                      <p className="text-xs text-gray-600 leading-relaxed font-sans pr-2">
+                        {review.comment}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-600 mt-3 leading-relaxed bg-gray-50 p-2.5 rounded-sm border border-gray-100">
-                    {review.comment}
-                  </p>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 

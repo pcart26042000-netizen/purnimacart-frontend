@@ -51,6 +51,8 @@ export default function AdminCustomers() {
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-wider text-[#5e3f3b]/50 border-b border-[#e8bcb7]/15">
                   <th className="px-5 py-3.5 font-bold">Customer</th>
+                  <th className="px-5 py-3.5 font-bold">WhatsApp</th>
+                  <th className="px-5 py-3.5 font-bold">Deals Opt-in</th>
                   <th className="px-5 py-3.5 font-bold">Joined</th>
                   <th className="px-5 py-3.5 font-bold">Orders</th>
                   <th className="px-5 py-3.5 font-bold">Lifetime Spend</th>
@@ -73,6 +75,21 @@ export default function AdminCustomers() {
                           <p className="text-[10px] text-[#5e3f3b]/60 truncate">{c.email}</p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs font-medium">
+                      {c.whatsapp ? (
+                        <span className="font-mono">{c.whatsapp}</span>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-center">
+                      <input
+                        type="checkbox"
+                        checked={!!c.receiveDeals}
+                        readOnly
+                        className="w-3.5 h-3.5 accent-primary rounded pointer-events-none"
+                      />
                     </td>
                     <td className="px-5 py-3.5 text-[#5e3f3b]/70 text-xs">
                       {c.createdAt?.toDate?.() ? c.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}

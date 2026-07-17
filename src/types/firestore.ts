@@ -109,6 +109,8 @@ export interface FirestoreUser {
   photoURL?: string;
   addresses: Address[];
   createdAt: Timestamp | null;
+  whatsapp?: string;
+  receiveDeals?: boolean;
 }
 
 export interface OrderItem {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Plus, Pencil, Trash2, CheckCircle2, X, Star } from 'lucide-react';
 import type { Address } from '../types/firestore';
 import { addAddress, updateAddress, deleteAddress, setDefaultAddress, validateAddress, type AddressInput } from '../lib/services/addresses';
@@ -28,12 +28,18 @@ const EMPTY_FORM: AddressInput = {
 };
 
 export default function AddressBook({ uid, addresses, selectable, selectedId, onSelect, onToast }: AddressBookProps) {
-  const [formOpen, setFormOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(addresses.length === 0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AddressInput>(EMPTY_FORM);
   const [errors, setErrors] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (addresses.length === 0) {
+      setFormOpen(true);
+    }
+  }, [addresses.length]);
 
   const openAdd = () => {
     setForm(EMPTY_FORM);

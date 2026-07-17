@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MapPin, Tag, CheckCircle2, Wallet, Smartphone, Loader2, ChevronLeft, AlertTriangle, Plus, Minus } from 'lucide-react';
 import type { CartItem } from '../types';
 import type { Address, PaymentMethod } from '../types/firestore';
@@ -55,6 +55,23 @@ export default function CheckoutPage({
   const [stage, setStage] = useState<Stage>('idle');
   const [checkoutError, setCheckoutError] = useState('');
   const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  // Auto-scroll to top of viewport on step change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
+
+  // Auto-select address when addresses load or update
+  useEffect(() => {
+    if (addresses.length > 0) {
+      if (!selectedAddressId || !addresses.some((a) => a.id === selectedAddressId)) {
+        const def = addresses.find((a) => a.isDefault) || addresses[0];
+        setSelectedAddressId(def.id);
+      }
+    } else {
+      setSelectedAddressId(null);
+    }
+  }, [addresses, selectedAddressId]);
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) || null;
   const busy = stage !== 'idle';
@@ -392,53 +409,103 @@ export default function CheckoutPage({
 
           {/* Payment method */}
           {step === 3 && (
-            <>
-              <section className="bg-white border border-gray-200 rounded-sm p-4 space-y-4">
-                <h2 className="font-sans font-bold text-base text-gray-900">Payment Method</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-6">
+              <section className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                  <div>
+                    <h2 className="font-sans font-bold text-lg text-gray-900">Choose Payment Option</h2>
+                    <p className="text-xs text-gray-500 mt-1">Select your preferred way to pay</p>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-100 uppercase tracking-wider">
+                    🔒 256-bit Secure
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Option 1: Razorpay / Online */}
                   <button
-                    onClick={() => setPaymentMethod('cod')}
-                    disabled={busy}
-                    className={`p-4 rounded-sm border flex items-center gap-3 text-left transition-all cursor-pointer disabled:opacity-60 ${
-                      paymentMethod === 'cod' ? 'border-primary bg-primary/10' : 'border-gray-200 bg-white hover:border-primary'
-                    }`}
-                  >
-                    <Wallet size={20} className="text-primary shrink-0" />
-                    <div>
-                      <p className="text-xs font-bold text-gray-900">Cash on Delivery</p>
-                      <p className="text-[10px] text-gray-400">Pay when your order arrives</p>
-                    </div>
-                    {paymentMethod === 'cod' && <CheckCircle2 size={16} className="text-primary ml-auto shrink-0" />}
-                  </button>
-                  <button
+                    type="button"
                     onClick={() => setPaymentMethod('razorpay')}
                     disabled={busy}
-                    className={`p-4 rounded-sm border flex items-center gap-3 text-left transition-all cursor-pointer disabled:opacity-60 ${
-                      paymentMethod === 'razorpay' ? 'border-primary bg-primary/10' : 'border-gray-200 bg-white hover:border-primary'
+                    className={`group p-6 rounded-2xl border text-left transition-all duration-300 relative flex flex-col justify-between h-40 cursor-pointer ${
+                      paymentMethod === 'razorpay'
+                        ? 'border-blue-600 bg-blue-50/20 ring-2 ring-blue-600/10 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-gray-50/50'
                     }`}
                   >
-                    <Smartphone size={20} className="text-primary shrink-0" />
-                    <div>
-                      <p className="text-xs font-bold text-gray-900">Razorpay</p>
-                      <p className="text-[10px] text-gray-400">UPI, Cards & Netbanking</p>
+                    <div className="flex items-start justify-between w-full">
+                      <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-600/20">
+                        <Smartphone size={20} />
+                      </div>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                        Popular
+                      </span>
                     </div>
-                    {paymentMethod === 'razorpay' && <CheckCircle2 size={16} className="text-primary ml-auto shrink-0" />}
+
+                    <div className="mt-4">
+                      <h4 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                        Pay Online
+                        {paymentMethod === 'razorpay' && <CheckCircle2 size={15} className="text-blue-600 shrink-0" />}
+                      </h4>
+                      <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+                        UPI, Google Pay, Credit/Debit Cards, Net Banking
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* Option 2: Cash on Delivery */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('cod')}
+                    disabled={busy}
+                    className={`group p-6 rounded-2xl border text-left transition-all duration-300 relative flex flex-col justify-between h-40 cursor-pointer ${
+                      paymentMethod === 'cod'
+                        ? 'border-amber-600 bg-amber-50/10 ring-2 ring-amber-600/10 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-gray-50/50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between w-full">
+                      <div className="w-10 h-10 rounded-xl bg-amber-600/10 flex items-center justify-center text-amber-600 transition-colors group-hover:bg-amber-600/20">
+                        <Wallet size={20} />
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <h4 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                        Cash on Delivery
+                        {paymentMethod === 'cod' && <CheckCircle2 size={15} className="text-amber-600 shrink-0" />}
+                      </h4>
+                      <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+                        Pay with cash or scan UPI code when order is delivered
+                      </p>
+                    </div>
                   </button>
                 </div>
-                {paymentMethod === 'razorpay' && (
-                  <p className="text-[10px] text-primary bg-primary/10 px-4 py-2.5 rounded-sm">
-                    You'll be charged ₹{total.toLocaleString()} securely via Razorpay. Your order is only created after payment is verified on our server.
-                  </p>
-                )}
+
+                {/* Secure Payment note */}
+                <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 flex gap-3 items-start">
+                  <div className="text-base mt-0.5">ℹ️</div>
+                  <div className="text-[11px] text-gray-600 leading-relaxed">
+                    {paymentMethod === 'razorpay' ? (
+                      <span>
+                        You will pay <strong>₹{total.toLocaleString('en-IN')}</strong> securely using Razorpay's checkout popup. Once verified, your order will be confirmed instantly.
+                      </span>
+                    ) : (
+                      <span>
+                        Place your order now and pay <strong>₹{total.toLocaleString('en-IN')}</strong> on delivery. Safe, zero-contact payment options are available upon delivery.
+                      </span>
+                    )}
+                  </div>
+                </div>
               </section>
 
               {checkoutError && (
-                <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-sm px-5 py-4">
+                <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-2xl px-5 py-4">
                   <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                   <span>{checkoutError}</span>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
 

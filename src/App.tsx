@@ -21,6 +21,8 @@ import { useCategories } from './hooks/useCategories';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
 import { useStoreSettings } from './hooks/useStoreSettings';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from './lib/firebase';
 
 import Header from './components/Header';
 import ProductCard from './components/ProductCard';
@@ -171,6 +173,49 @@ export default function App() {
   const { categories, loading: categoriesLoading } = useCategories(PRODUCTS);
   const { user, userDoc, isAdmin, loading: authLoading, signInWithGoogle, signInWithEmail, setAdminMock } = useAuth();
   const { banners: firestoreBanners } = useActiveBanners();
+
+  // WhatsApp Profile Completion States
+  const [whatsAppName, setWhatsAppName] = useState('');
+  const [whatsAppPhone, setWhatsAppPhone] = useState('');
+  const [whatsAppReceiveDeals, setWhatsAppReceiveDeals] = useState(true);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+
+  // Auto-fill name if userDoc is available but name is empty in our state
+  useEffect(() => {
+    if (userDoc && !whatsAppName) {
+      setWhatsAppName(userDoc.name || user?.displayName || '');
+    }
+  }, [userDoc, user]);
+
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    
+    const cleanPhone = whatsAppPhone.replace(/\D/g, '');
+    if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+      setPhoneError('Please enter a valid 10 to 15 digit WhatsApp number.');
+      return;
+    }
+    
+    setPhoneError('');
+    setProfileSaving(true);
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        name: whatsAppName.trim(),
+        whatsapp: cleanPhone,
+        receiveDeals: whatsAppReceiveDeals
+      });
+      triggerToast('Profile completed successfully! Welcome, buddy!');
+    } catch (err) {
+      console.error('Error saving WhatsApp profile details:', err);
+      triggerToast('Failed to save profile. Please try again.', 'info');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const showProfileModal = !!(user && userDoc && !isAdmin && !userDoc.whatsapp);
 
   // Navigation & Page State
   const [currentPage, setCurrentPage] = useState<PageType>('home');
@@ -1298,6 +1343,91 @@ export default function App() {
         onDeactivate={handleFiveMinDeactivate}
         triggerToast={triggerToast}
       />
+
+      {/* WhatsApp Profile Completion Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1200] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#e8bcb7]/15 p-6 sm:p-8 max-w-md w-full shadow-2xl relative animate-scale-up text-center space-y-6">
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone-call">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="font-display font-black text-xl text-[#291715]">Hii Buddy! 👋</h3>
+              <p className="text-xs text-[#5e3f3b]/70 leading-relaxed">
+                Let's complete your profile to continue shopping. Enter your WhatsApp details to get the best deals and tracking updates directly on WhatsApp!
+              </p>
+            </div>
+
+            <form onSubmit={handleProfileSave} className="space-y-4 text-left">
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Diya Sen"
+                  value={whatsAppName}
+                  onChange={(e) => setWhatsAppName(e.target.value)}
+                  className="w-full bg-[#fff8f7] border border-[#e8bcb7]/20 rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-primary/20 text-[#291715]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                  WhatsApp Number
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="e.g. 9876543210"
+                  value={whatsAppPhone}
+                  onChange={(e) => {
+                    setWhatsAppPhone(e.target.value.replace(/\D/g, ''));
+                    setPhoneError('');
+                  }}
+                  className="w-full bg-[#fff8f7] border border-[#e8bcb7]/20 rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-primary/20 text-[#291715]"
+                />
+                {phoneError && (
+                  <p className="text-[10px] text-red-500 font-bold mt-1">{phoneError}</p>
+                )}
+              </div>
+
+              <label className="flex items-start gap-2.5 cursor-pointer pt-1.5 select-none">
+                <input
+                  type="checkbox"
+                  checked={whatsAppReceiveDeals}
+                  onChange={(e) => setWhatsAppReceiveDeals(e.target.checked)}
+                  className="mt-0.5 rounded border-[#e8bcb7]/30 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
+                />
+                <span className="text-[11px] font-semibold text-[#5e3f3b] leading-tight">
+                  Yes, I want to receive the best deals and order alerts on WhatsApp!
+                </span>
+              </label>
+
+              <button
+                type="submit"
+                disabled={profileSaving}
+                className="w-full bg-primary hover:bg-[#9a000e] text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-red-500/10 flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {profileSaving ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save & Continue'
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

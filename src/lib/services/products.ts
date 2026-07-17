@@ -4,6 +4,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { FirestoreProduct } from '../../types/firestore';
+import type { Review } from '../../types';
 
 const COL = 'products';
 
@@ -99,4 +100,51 @@ export function searchProductsLocal(products: FirestoreProduct[], queryText: str
     p.categorySlug.toLowerCase().includes(q) ||
     p.tags.some(t => t.toLowerCase().includes(q))
   );
+}
+
+export async function getProductReviews(productId: string): Promise<Review[]> {
+  const colRef = collection(db, 'products', productId, 'reviews');
+  const q = query(colRef, orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(doc => {
+    const data = doc.data();
+    let dateStr = 'Today';
+    if (data.createdAt) {
+      const date = typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt);
+      dateStr = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    return {
+      id: doc.id,
+      userName: data.userName || 'Anonymous',
+      rating: data.rating || 5,
+      date: dateStr,
+      comment: data.comment || '',
+    };
+  });
+}
+
+export async function addProductReview(
+  productId: string,
+  review: { userName: string; rating: number; comment: string }
+): Promise<void> {
+  const colRef = collection(db, 'products', productId, 'reviews');
+  await addDoc(colRef, {
+    ...review,
+    createdAt: serverTimestamp()
+  });
+
+  // Recalculate average rating and count
+  const allReviews = await getProductReviews(productId);
+  const reviewCount = allReviews.length;
+  const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0);
+  const averageRating = reviewCount > 0 ? parseFloat((totalRating / reviewCount).toFixed(1)) : 5;
+
+  await updateDoc(doc(db, 'products', productId), {
+    rating: averageRating,
+    reviewCount: reviewCount
+  });
 }

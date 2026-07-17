@@ -15,6 +15,8 @@ export interface AdminCustomer {
   createdAt: FirestoreUser['createdAt'];
   orderCount: number;
   totalSpend: number;
+  whatsapp?: string;
+  receiveDeals?: boolean;
 }
 
 export async function getAllCustomersWithStats(): Promise<AdminCustomer[]> {
@@ -47,6 +49,8 @@ export async function getAllCustomersWithStats(): Promise<AdminCustomer[]> {
         createdAt: user.createdAt,
         orderCount: stats.orderCount,
         totalSpend: stats.totalSpend,
+        whatsapp: user.whatsapp,
+        receiveDeals: user.receiveDeals,
       };
     })
     .sort((a, b) => b.totalSpend - a.totalSpend);

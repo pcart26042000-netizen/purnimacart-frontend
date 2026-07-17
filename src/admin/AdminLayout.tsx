@@ -14,6 +14,7 @@ import {
   Bell,
   CheckCircle2,
   Info,
+  Sparkles,
 } from 'lucide-react';
 import { AdminSection } from '../types';
 
@@ -25,6 +26,7 @@ const NAV_ITEMS: { id: AdminSection; label: string; icon: React.ElementType }[] 
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'coupons', label: 'Coupons', icon: Ticket },
   { id: 'banners', label: 'Banner Manager', icon: ImageIcon },
+  { id: 'brand-deals', label: 'Brand Deals', icon: Sparkles },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

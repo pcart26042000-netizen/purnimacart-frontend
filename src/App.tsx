@@ -17,6 +17,7 @@ import type { FirestoreCoupon } from './types/firestore';
 import { useAuth } from './context/AuthContext';
 import { useActiveProducts } from './hooks/useProducts';
 import { useActiveBanners } from './hooks/useBanners';
+import { useActiveBrandDeals } from './hooks/useBrandDeals';
 import { useCategories } from './hooks/useCategories';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
@@ -49,6 +50,7 @@ import AdminCategories from './admin/AdminCategories';
 import AdminCustomers from './admin/AdminCustomers';
 import AdminCoupons from './admin/AdminCoupons';
 import AdminBanners from './admin/AdminBanners';
+import AdminBrandDeals from './admin/AdminBrandDeals';
 import AdminSettings from './admin/AdminSettings';
 
 const DEFAULT_FIVE_MIN_PINCODE = '732101';
@@ -173,6 +175,7 @@ export default function App() {
   const { categories, loading: categoriesLoading } = useCategories(PRODUCTS);
   const { user, userDoc, isAdmin, loading: authLoading, signInWithGoogle, signInWithEmail, setAdminMock } = useAuth();
   const { banners: firestoreBanners } = useActiveBanners();
+  const { deals: activeBrandDeals } = useActiveBrandDeals();
 
   // WhatsApp Profile Completion States
   const [whatsAppName, setWhatsAppName] = useState('');
@@ -577,6 +580,7 @@ export default function App() {
         {adminSection === 'customers' && <AdminCustomers />}
         {adminSection === 'coupons' && <AdminCoupons onToast={triggerToast} />}
         {adminSection === 'banners' && <AdminBanners onToast={triggerToast} />}
+        {adminSection === 'brand-deals' && <AdminBrandDeals onToast={triggerToast} />}
         {adminSection === 'settings' && <AdminSettings onToast={triggerToast} />}
       </AdminLayout>
     );
@@ -727,6 +731,67 @@ export default function App() {
                 </div>
               )}
             </section>
+
+            {/* Best For You scrollable Brand Deals section */}
+            {activeBrandDeals.length > 0 && (
+              <section className="space-y-6">
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
+                    Best For You
+                  </h2>
+                </div>
+
+                <div className="flex overflow-x-auto gap-5 pb-4 hide-scrollbar snap-x snap-mandatory -mx-6 px-6">
+                  {activeBrandDeals.map((deal) => (
+                    <div
+                      key={deal.id}
+                      onClick={() => {
+                        setSelectedCategory(deal.link || 'all');
+                        setCurrentPage('category');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="min-w-[200px] sm:min-w-[240px] aspect-[4/5] rounded-[32px] overflow-hidden relative cursor-pointer group shadow-md hover:shadow-lg transition-all duration-300 snap-start shrink-0 flex flex-col justify-end"
+                    >
+                      {/* Image background */}
+                      <img
+                        src={deal.imageUrl}
+                        alt={deal.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      
+                      {/* Dark gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 group-hover:via-black/45 transition-colors duration-300" />
+
+                      {/* Content overlays */}
+                      <div className="relative z-10 p-5 flex flex-col items-center text-center space-y-2">
+                        {/* Brand Badge */}
+                        <div className="bg-white px-3 py-1 rounded-sm shadow-sm max-h-7 flex items-center justify-center max-w-[120px] select-none">
+                          <span className="text-[10px] font-black text-black tracking-wider uppercase truncate">
+                            {deal.brandName}
+                          </span>
+                        </div>
+
+                        {/* X label */}
+                        <div className="text-[10px] font-extrabold text-white/70 tracking-widest uppercase">
+                          X
+                        </div>
+
+                        {/* Celebrity/Collection Title */}
+                        <h4 className="text-sm sm:text-base font-extrabold text-white tracking-tight drop-shadow-md">
+                          {deal.title}
+                        </h4>
+                      </div>
+
+                      {/* Yellow bottom discount banner */}
+                      <div className="relative z-10 w-full bg-[#ffd11a] hover:bg-[#e6b800] text-[#1a1100] py-2.5 text-center text-xs font-black uppercase tracking-wider select-none transition-colors border-t border-black/5">
+                        {deal.discountText}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Trending now section */}
             <section className="space-y-10">

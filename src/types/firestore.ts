@@ -227,3 +227,16 @@ export interface StoreSettings {
   singleBannerCtaText?: string;
   fiveMinMinOrderValue?: number;
 }
+
+export interface FirestoreBrandDeal {
+  id: string;
+  imageUrl: string;
+  brandLogoUrl?: string;
+  title: string;
+  brandName: string;
+  discountText: string;
+  link: string;
+  order: number;
+  isActive: boolean;
+  createdAt: Timestamp | null;
+}

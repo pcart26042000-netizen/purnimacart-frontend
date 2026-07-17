@@ -58,7 +58,8 @@ export type AdminSection =
   | 'customers'
   | 'coupons'
   | 'banners'
-  | 'settings';
+  | 'settings'
+  | 'brand-deals';
 
 export interface Category {
   id: string;

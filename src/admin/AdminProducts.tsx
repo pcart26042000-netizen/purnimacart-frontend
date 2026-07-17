@@ -608,7 +608,7 @@ export default function AdminProducts({ onToast }: AdminProductsProps) {
                       <div className="flex items-center gap-3">
                         <img src={p.images[0] || 'https://placehold.co/80x80/fff0ee/bb0012?text=PC'} alt={p.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold text-[#291715] truncate max-w-[200px] flex items-center gap-1">
+                          <p className="text-xs font-semibold text-[#291715] flex items-center gap-1">
                             {p.name}
                             {p.isFeatured && <Star size={11} className="fill-amber-400 text-amber-400 shrink-0" />}
                           </p>

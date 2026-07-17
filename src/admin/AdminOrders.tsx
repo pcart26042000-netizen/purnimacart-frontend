@@ -209,7 +209,7 @@ function OrderDetailModal({
                 <div key={idx} className="flex items-center gap-3">
                   <img src={item.image} alt={item.name} className="w-11 h-11 rounded-lg object-cover shrink-0 bg-[#fff0ee]" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[#291715] truncate">{item.name}</p>
+                    <p className="text-xs font-semibold text-[#291715]">{item.name}</p>
                     <p className="text-[10px] text-[#5e3f3b]/60">
                       Qty {item.qty}
                       {(item.selectedSize || item.variant?.size) ? ` · ${item.selectedSize || item.variant?.size}` : ''}

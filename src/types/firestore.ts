@@ -54,6 +54,7 @@ export interface FirestoreProduct {
   isActive: boolean;
   isFeatured?: boolean;
   isFiveMinBadge?: boolean;
+  isFashionFit?: boolean;
   createdAt: Timestamp | null;
   updatedAt?: Timestamp | null;
 }
@@ -226,17 +227,4 @@ export interface StoreSettings {
   singleBannerSubtitle?: string;
   singleBannerCtaText?: string;
   fiveMinMinOrderValue?: number;
-}
-
-export interface FirestoreBrandDeal {
-  id: string;
-  imageUrl: string;
-  brandLogoUrl?: string;
-  title: string;
-  brandName: string;
-  discountText: string;
-  link: string;
-  order: number;
-  isActive: boolean;
-  createdAt: Timestamp | null;
 }

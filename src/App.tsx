@@ -17,7 +17,6 @@ import type { FirestoreCoupon } from './types/firestore';
 import { useAuth } from './context/AuthContext';
 import { useActiveProducts } from './hooks/useProducts';
 import { useActiveBanners } from './hooks/useBanners';
-import { useActiveBrandDeals } from './hooks/useBrandDeals';
 import { useCategories } from './hooks/useCategories';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
@@ -50,7 +49,6 @@ import AdminCategories from './admin/AdminCategories';
 import AdminCustomers from './admin/AdminCustomers';
 import AdminCoupons from './admin/AdminCoupons';
 import AdminBanners from './admin/AdminBanners';
-import AdminBrandDeals from './admin/AdminBrandDeals';
 import AdminSettings from './admin/AdminSettings';
 
 const DEFAULT_FIVE_MIN_PINCODE = '732101';
@@ -175,7 +173,6 @@ export default function App() {
   const { categories, loading: categoriesLoading } = useCategories(PRODUCTS);
   const { user, userDoc, isAdmin, loading: authLoading, signInWithGoogle, signInWithEmail, setAdminMock } = useAuth();
   const { banners: firestoreBanners } = useActiveBanners();
-  const { deals: activeBrandDeals } = useActiveBrandDeals();
 
   // WhatsApp Profile Completion States
   const [whatsAppName, setWhatsAppName] = useState('');
@@ -194,13 +191,13 @@ export default function App() {
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    
+
     const cleanPhone = whatsAppPhone.replace(/\D/g, '');
     if (cleanPhone.length < 10 || cleanPhone.length > 15) {
       setPhoneError('Please enter a valid 10 to 15 digit WhatsApp number.');
       return;
     }
-    
+
     setPhoneError('');
     setProfileSaving(true);
     try {
@@ -497,6 +494,7 @@ export default function App() {
     : [];
 
   const trendingProducts = PRODUCTS;
+  const fashionFitProducts = PRODUCTS.filter((p) => p.isFashionFit);
 
   // Category browse products
   const categoryFilteredProducts = selectedCategory === 'all'
@@ -580,7 +578,6 @@ export default function App() {
         {adminSection === 'customers' && <AdminCustomers />}
         {adminSection === 'coupons' && <AdminCoupons onToast={triggerToast} />}
         {adminSection === 'banners' && <AdminBanners onToast={triggerToast} />}
-        {adminSection === 'brand-deals' && <AdminBrandDeals onToast={triggerToast} />}
         {adminSection === 'settings' && <AdminSettings onToast={triggerToast} />}
       </AdminLayout>
     );
@@ -660,670 +657,652 @@ export default function App() {
             <p className="text-xs font-semibold text-[#5e3f3b]/60">Loading the boutique for youâ€¦</p>
           </div>
         ) : (
-        <>
-        {currentPage === 'home' && (
-          <div className="space-y-16">
-            {/* Hero Banner Carousel Slider */}
-            <section className="relative w-full aspect-[16/10] sm:aspect-[21/9] md:aspect-[25/9] overflow-hidden rounded-[32px] bg-[#ffe9e6] shadow-xl">
-              <div
-                className="flex transition-transform duration-700 ease-out h-full"
-                style={{ transform: `translateX(-${currentHeroIndex * 100}%)` }}
-              >
-                {firestoreBanners.length > 0 ? (
-                  firestoreBanners.map((slide) => (
-                    <div key={slide.id} className="min-w-full h-full relative flex-shrink-0">
-                      <img
-                        src={slide.imageUrl}
-                        alt={slide.title || 'Promotional Banner'}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))
-                ) : (
-                  heroSlides.map((slide, idx) => (
-                    <div key={idx} className="min-w-full h-full relative group flex-shrink-0">
-                      <img
-                        src={slide.image}
-                        alt={slide.title}
-                        className="w-full h-full object-cover brightness-[0.85]"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/10 to-transparent flex items-center px-8 md:px-16">
-                        <div className="max-w-xl text-white space-y-3 md:space-y-5">
-                          <span className="inline-block px-4 py-1.5 bg-primary text-white rounded-full text-[10px] uppercase font-bold tracking-widest font-sans shadow">
-                            {slide.subtitle}
-                          </span>
-                          <h1 className="font-display font-bold text-3xl md:text-5xl leading-tight tracking-tight drop-shadow-md">
-                            {slide.title}
-                          </h1>
-                          <p className="font-sans text-xs md:text-sm text-white/90 leading-relaxed max-w-md hidden sm:block">
-                            {slide.description}
-                          </p>
-                          <button
-                            onClick={() => {
-                              setSelectedCategory(slide.category);
-                              setCurrentPage('category');
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className="bg-primary hover:bg-[#9a000e] text-white px-6 md:px-8 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition-all shadow-lg shadow-primary/20 hover:translate-x-1 cursor-pointer"
-                          >
-                            {slide.cta}
-                            <ArrowRight size={14} />
-                          </button>
+          <>
+            {currentPage === 'home' && (
+              <div className="space-y-16">
+                {/* Hero Banner Carousel Slider */}
+                <section className="relative w-full aspect-[16/10] sm:aspect-[21/9] md:aspect-[25/9] overflow-hidden rounded-[32px] bg-[#ffe9e6] shadow-xl">
+                  <div
+                    className="flex transition-transform duration-700 ease-out h-full"
+                    style={{ transform: `translateX(-${currentHeroIndex * 100}%)` }}
+                  >
+                    {firestoreBanners.length > 0 ? (
+                      firestoreBanners.map((slide) => (
+                        <div key={slide.id} className="min-w-full h-full relative flex-shrink-0">
+                          <img
+                            src={slide.imageUrl}
+                            alt={slide.title || 'Promotional Banner'}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                      </div>
+                      ))
+                    ) : (
+                      heroSlides.map((slide, idx) => (
+                        <div key={idx} className="min-w-full h-full relative group flex-shrink-0">
+                          <img
+                            src={slide.image}
+                            alt={slide.title}
+                            className="w-full h-full object-cover brightness-[0.85]"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/10 to-transparent flex items-center px-8 md:px-16">
+                            <div className="max-w-xl text-white space-y-3 md:space-y-5">
+                              <span className="inline-block px-4 py-1.5 bg-primary text-white rounded-full text-[10px] uppercase font-bold tracking-widest font-sans shadow">
+                                {slide.subtitle}
+                              </span>
+                              <h1 className="font-display font-bold text-3xl md:text-5xl leading-tight tracking-tight drop-shadow-md">
+                                {slide.title}
+                              </h1>
+                              <p className="font-sans text-xs md:text-sm text-white/90 leading-relaxed max-w-md hidden sm:block">
+                                {slide.description}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  setSelectedCategory(slide.category);
+                                  setCurrentPage('category');
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="bg-primary hover:bg-[#9a000e] text-white px-6 md:px-8 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition-all shadow-lg shadow-primary/20 hover:translate-x-1 cursor-pointer"
+                              >
+                                {slide.cta}
+                                <ArrowRight size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Slide Bullet Controls */}
+                  {totalSlides > 1 && (
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+                      {(firestoreBanners.length > 0 ? firestoreBanners : heroSlides).map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentHeroIndex(idx)}
+                          className={`h-2.5 rounded-full transition-all cursor-pointer ${currentHeroIndex === idx ? 'w-10 bg-primary shadow' : 'w-2.5 bg-white/45 hover:bg-white/70'
+                            }`}
+                        />
+                      ))}
                     </div>
-                  ))
+                  )}
+                </section>
+
+                {/* Fashion Fits Section */}
+                {fashionFitProducts.length > 0 && (
+                  <section className="space-y-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
+                        Fashion Fits
+                      </h2>
+                    </div>
+
+                    <div className="flex overflow-x-auto hide-scrollbar gap-4 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6">
+                      {fashionFitProducts.map((product) => {
+                        const displayImage = product.image;
+                        const activePrice = product.price;
+                        return (
+                          <div
+                            key={product.id}
+                            onClick={() => {
+                              setSelectedProductId(product.id);
+                              setCurrentPage('product-detail');
+                            }}
+                            className="w-[140px] sm:w-[160px] shrink-0 cursor-pointer group flex flex-col transition-all duration-300 hover:translate-y-[-2px]"
+                          >
+                            <div className="aspect-square w-full rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm flex items-center justify-center relative">
+                              <img
+                                src={displayImage}
+                                alt={product.name}
+                                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                loading="lazy"
+                              />
+                            </div>
+                            <div className="pt-2 px-1 flex flex-col text-center">
+                              <h3 className="font-sans font-bold text-xs sm:text-sm text-gray-900 group-hover:text-primary transition-colors truncate">
+                                {product.name}
+                              </h3>
+                              <p className="text-gray-950 font-black text-xs sm:text-sm mt-0.5">
+                                ₹{activePrice.toLocaleString('en-IN')}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
                 )}
-              </div>
 
-              {/* Slide Bullet Controls */}
-              {totalSlides > 1 && (
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-                  {(firestoreBanners.length > 0 ? firestoreBanners : heroSlides).map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentHeroIndex(idx)}
-                      className={`h-2.5 rounded-full transition-all cursor-pointer ${
-                        currentHeroIndex === idx ? 'w-10 bg-primary shadow' : 'w-2.5 bg-white/45 hover:bg-white/70'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
+                {/* Trending now section */}
+                <section className="space-y-10">
+                  <div className="flex items-center justify-between gap-4">
+                    <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
+                      Trending Now
+                    </h2>
+                  </div>
 
-            {/* Best For You scrollable Brand Deals section */}
-            {activeBrandDeals.length > 0 && (
-              <section className="space-y-6">
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
-                    Best For You
+                  {/* Trending products list */}
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                    {trendingProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onProductClick={(id) => {
+                          setSelectedProductId(id);
+                          setCurrentPage('product-detail');
+                        }}
+                        onAddToCart={(p, color, price, e) => {
+                          e.stopPropagation();
+                          handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
+                        }}
+                        isWishlisted={isWishlisted(product.id)}
+                        onToggleWishlist={(p, e) => {
+                          e.stopPropagation();
+                          handleToggleWishlist(p);
+                        }}
+                        isFiveMinActive={isFiveMinActive}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                {/* 4-Item Deal Showcase Grid Section */}
+                <section className="bg-white border border-[#e8bcb7]/25 rounded-[32px] p-6 sm:p-8 max-w-4xl mx-auto shadow-sm space-y-6">
+                  <h2 className="font-display font-extrabold text-xl sm:text-2xl text-[#291715] tracking-tight">
+                    {storeSettings.dealShowcaseTitle !== undefined && storeSettings.dealShowcaseTitle !== ''
+                      ? storeSettings.dealShowcaseTitle
+                      : 'Lowest Prices in the Year'}
                   </h2>
-                </div>
 
-                <div className="flex overflow-x-auto gap-5 pb-4 hide-scrollbar snap-x snap-mandatory -mx-6 px-6">
-                  {activeBrandDeals.map((deal) => (
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                    {/* Item 1 */}
                     <div
-                      key={deal.id}
                       onClick={() => {
-                        setSelectedCategory(deal.link || 'all');
+                        const cat = (storeSettings.dealItem1Link || 'accessories').trim().toLowerCase();
+                        if (cat) {
+                          setSelectedCategory(cat);
+                          setCurrentPage('category');
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }}
+                      className="flex flex-col group cursor-pointer"
+                    >
+                      <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
+                        <img
+                          src={storeSettings.dealItem1Image || dealSoundbar}
+                          alt={storeSettings.dealItem1Title || 'Soundbars'}
+                          className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        {(storeSettings.dealItem1Badge !== undefined ? storeSettings.dealItem1Badge : 'Up to 80% Off') && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
+                            {storeSettings.dealItem1Badge !== undefined ? storeSettings.dealItem1Badge : 'Up to 80% Off'}
+                          </div>
+                        )}
+                      </div>
+                      <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
+                        {storeSettings.dealItem1Title !== undefined ? storeSettings.dealItem1Title : 'Soundbars'}
+                      </span>
+                    </div>
+
+                    {/* Item 2 */}
+                    <div
+                      onClick={() => {
+                        const cat = (storeSettings.dealItem2Link || 'accessories').trim().toLowerCase();
+                        if (cat) {
+                          setSelectedCategory(cat);
+                          setCurrentPage('category');
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }}
+                      className="flex flex-col group cursor-pointer"
+                    >
+                      <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
+                        <img
+                          src={storeSettings.dealItem2Image || dealPrinter}
+                          alt={storeSettings.dealItem2Title || 'Multi Function Printers'}
+                          className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        {(storeSettings.dealItem2Badge !== undefined ? storeSettings.dealItem2Badge : 'Up to 20% Off') && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
+                            {storeSettings.dealItem2Badge !== undefined ? storeSettings.dealItem2Badge : 'Up to 20% Off'}
+                          </div>
+                        )}
+                      </div>
+                      <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
+                        {storeSettings.dealItem2Title !== undefined ? storeSettings.dealItem2Title : 'Multi Function Printers'}
+                      </span>
+                    </div>
+
+                    {/* Item 3 */}
+                    <div
+                      onClick={() => {
+                        const cat = (storeSettings.dealItem3Link || 'accessories').trim().toLowerCase();
+                        if (cat) {
+                          setSelectedCategory(cat);
+                          setCurrentPage('category');
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }}
+                      className="flex flex-col group cursor-pointer"
+                    >
+                      <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
+                        <img
+                          src={storeSettings.dealItem3Image || dealHeadphones}
+                          alt={storeSettings.dealItem3Title || 'Headphones'}
+                          className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        {(storeSettings.dealItem3Badge !== undefined ? storeSettings.dealItem3Badge : 'Up to 60% Off') && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
+                            {storeSettings.dealItem3Badge !== undefined ? storeSettings.dealItem3Badge : 'Up to 60% Off'}
+                          </div>
+                        )}
+                      </div>
+                      <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
+                        {storeSettings.dealItem3Title !== undefined ? storeSettings.dealItem3Title : 'Headphones'}
+                      </span>
+                    </div>
+
+                    {/* Item 4 */}
+                    <div
+                      onClick={() => {
+                        const cat = (storeSettings.dealItem4Link || 'toys').trim().toLowerCase();
+                        if (cat) {
+                          setSelectedCategory(cat);
+                          setCurrentPage('category');
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }}
+                      className="flex flex-col group cursor-pointer"
+                    >
+                      <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
+                        <img
+                          src={storeSettings.dealItem4Image || dealToyLaptop}
+                          alt={storeSettings.dealItem4Title || 'Kids Laptops and Tablets'}
+                          className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        {(storeSettings.dealItem4Badge !== undefined ? storeSettings.dealItem4Badge : 'Up to 70% Off') && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
+                            {storeSettings.dealItem4Badge !== undefined ? storeSettings.dealItem4Badge : 'Up to 70% Off'}
+                          </div>
+                        )}
+                      </div>
+                      <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
+                        {storeSettings.dealItem4Title !== undefined ? storeSettings.dealItem4Title : 'Kids Laptops and Tablets'}
+                      </span>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Single Collection Banner Section (800x1200 px responsive aspect ratio) */}
+                <section className="max-w-4xl mx-auto">
+                  <div
+                    onClick={() => {
+                      const cat = (storeSettings.singleBannerCategory || 'dresses').trim().toLowerCase();
+                      if (cat) {
+                        setSelectedCategory(cat);
                         setCurrentPage('category');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="min-w-[200px] sm:min-w-[240px] aspect-[4/5] rounded-[32px] overflow-hidden relative cursor-pointer group shadow-md hover:shadow-lg transition-all duration-300 snap-start shrink-0 flex flex-col justify-end"
-                    >
-                      {/* Image background */}
-                      <img
-                        src={deal.imageUrl}
-                        alt={deal.title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        loading="lazy"
-                      />
-                      
-                      {/* Dark gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 group-hover:via-black/45 transition-colors duration-300" />
-
-                      {/* Content overlays */}
-                      <div className="relative z-10 p-5 flex flex-col items-center text-center space-y-2">
-                        {/* Brand Badge */}
-                        <div className="bg-white px-3 py-1 rounded-sm shadow-sm max-h-7 flex items-center justify-center max-w-[120px] select-none">
-                          <span className="text-[10px] font-black text-black tracking-wider uppercase truncate">
-                            {deal.brandName}
+                      }
+                    }}
+                    className="relative aspect-[2/3] sm:aspect-[3/2] w-full rounded-[32px] overflow-hidden border border-[#e8bcb7]/25 shadow-md group cursor-pointer"
+                  >
+                    <img
+                      src={storeSettings.singleBannerImage || singleCollectionBanner}
+                      alt={storeSettings.singleBannerTitle || 'Luxury Apparel'}
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-102"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/60 via-black/30 to-transparent flex flex-col justify-end sm:justify-center p-8 sm:p-12 text-white">
+                      <div className="max-w-md space-y-3 sm:space-y-4">
+                        {(storeSettings.singleBannerSubtitle !== undefined ? storeSettings.singleBannerSubtitle : 'Exclusive Summer Collection') && (
+                          <span className="text-[10px] sm:text-xs uppercase font-extrabold tracking-widest text-[#fedbd6] bg-primary/20 px-3 py-1 rounded-full border border-primary/25 w-fit block">
+                            {storeSettings.singleBannerSubtitle !== undefined ? storeSettings.singleBannerSubtitle : 'Exclusive Summer Collection'}
                           </span>
-                        </div>
-
-                        {/* X label */}
-                        <div className="text-[10px] font-extrabold text-white/70 tracking-widest uppercase">
-                          X
-                        </div>
-
-                        {/* Celebrity/Collection Title */}
-                        <h4 className="text-sm sm:text-base font-extrabold text-white tracking-tight drop-shadow-md">
-                          {deal.title}
-                        </h4>
-                      </div>
-
-                      {/* Yellow bottom discount banner */}
-                      <div className="relative z-10 w-full bg-[#ffd11a] hover:bg-[#e6b800] text-[#1a1100] py-2.5 text-center text-xs font-black uppercase tracking-wider select-none transition-colors border-t border-black/5">
-                        {deal.discountText}
+                        )}
+                        {(storeSettings.singleBannerTitle !== undefined ? storeSettings.singleBannerTitle : 'Luxury Apparel') && (
+                          <h2 className="text-3xl sm:text-4xl font-display font-black tracking-tight leading-tight">
+                            {storeSettings.singleBannerTitle !== undefined ? storeSettings.singleBannerTitle : 'Luxury Apparel'}
+                          </h2>
+                        )}
+                        {(storeSettings.singleBannerCtaText !== undefined ? storeSettings.singleBannerCtaText : 'Shop Collection') && (
+                          <button
+                            type="button"
+                            className="bg-primary hover:bg-[#9a000e] text-white px-6 py-3 rounded-xl font-bold text-xs transition-all shadow-lg shadow-primary/25 cursor-pointer w-fit flex items-center gap-2"
+                          >
+                            {storeSettings.singleBannerCtaText !== undefined ? storeSettings.singleBannerCtaText : 'Shop Collection'}
+                            <ArrowRight size={14} />
+                          </button>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Trending now section */}
-            <section className="space-y-10">
-              <div className="flex items-center justify-between gap-4">
-                <h2 className="font-display font-bold text-2xl text-[#291715] tracking-tight">
-                  Trending Now
-                </h2>
-              </div>
-
-              {/* Trending products list */}
-              <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                {trendingProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onProductClick={(id) => {
-                      setSelectedProductId(id);
-                      setCurrentPage('product-detail');
-                    }}
-                    onAddToCart={(p, color, price, e) => {
-                      e.stopPropagation();
-                      handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
-                    }}
-                    isWishlisted={isWishlisted(product.id)}
-                    onToggleWishlist={(p, e) => {
-                      e.stopPropagation();
-                      handleToggleWishlist(p);
-                    }}
-                    isFiveMinActive={isFiveMinActive}
-                  />
-                ))}
-              </div>
-            </section>
-
-            {/* 4-Item Deal Showcase Grid Section */}
-            <section className="bg-white border border-[#e8bcb7]/25 rounded-[32px] p-6 sm:p-8 max-w-4xl mx-auto shadow-sm space-y-6">
-              <h2 className="font-display font-extrabold text-xl sm:text-2xl text-[#291715] tracking-tight">
-                {storeSettings.dealShowcaseTitle !== undefined && storeSettings.dealShowcaseTitle !== ''
-                  ? storeSettings.dealShowcaseTitle
-                  : 'Lowest Prices in the Year'}
-              </h2>
-
-              <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                {/* Item 1 */}
-                <div
-                  onClick={() => {
-                    const cat = (storeSettings.dealItem1Link || 'accessories').trim().toLowerCase();
-                    if (cat) {
-                      setSelectedCategory(cat);
-                      setCurrentPage('category');
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                  }}
-                  className="flex flex-col group cursor-pointer"
-                >
-                  <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
-                    <img
-                      src={storeSettings.dealItem1Image || dealSoundbar}
-                      alt={storeSettings.dealItem1Title || 'Soundbars'}
-                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
+                  </div>
+                </section>
+                {/* Email Inner circle newsletter signup */}
+                <section className="py-16 px-6 bg-[#fedbd6] rounded-[40px] border border-[#e8bcb7]/25 text-center max-w-4xl mx-auto space-y-6 shadow-sm">
+                  <div className="max-w-2xl mx-auto space-y-3">
+                    <h2 className="font-display font-bold text-3xl text-[#291715]">
+                      Join the Inner Circle
+                    </h2>
+                    <p className="font-sans text-xs md:text-sm text-[#5e3f3b] leading-relaxed">
+                      Receive early access to collections, exclusive offers, and premium lifestyle inspiration curated for you.
+                    </p>
+                  </div>
+                  <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                    <input
+                      type="email"
+                      required
+                      placeholder="Enter your email address"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                      className="flex-grow bg-white px-5 py-3.5 text-xs rounded-xl outline-none focus:ring-1 focus:ring-primary border border-[#e8bcb7]/15 text-[#291715]"
                     />
-                    {(storeSettings.dealItem1Badge !== undefined ? storeSettings.dealItem1Badge : 'Up to 80% Off') && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
-                        {storeSettings.dealItem1Badge !== undefined ? storeSettings.dealItem1Badge : 'Up to 80% Off'}
-                      </div>
-                    )}
-                  </div>
-                  <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
-                    {storeSettings.dealItem1Title !== undefined ? storeSettings.dealItem1Title : 'Soundbars'}
-                  </span>
-                </div>
-
-                {/* Item 2 */}
-                <div
-                  onClick={() => {
-                    const cat = (storeSettings.dealItem2Link || 'accessories').trim().toLowerCase();
-                    if (cat) {
-                      setSelectedCategory(cat);
-                      setCurrentPage('category');
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                  }}
-                  className="flex flex-col group cursor-pointer"
-                >
-                  <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
-                    <img
-                      src={storeSettings.dealItem2Image || dealPrinter}
-                      alt={storeSettings.dealItem2Title || 'Multi Function Printers'}
-                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    {(storeSettings.dealItem2Badge !== undefined ? storeSettings.dealItem2Badge : 'Up to 20% Off') && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
-                        {storeSettings.dealItem2Badge !== undefined ? storeSettings.dealItem2Badge : 'Up to 20% Off'}
-                      </div>
-                    )}
-                  </div>
-                  <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
-                    {storeSettings.dealItem2Title !== undefined ? storeSettings.dealItem2Title : 'Multi Function Printers'}
-                  </span>
-                </div>
-
-                {/* Item 3 */}
-                <div
-                  onClick={() => {
-                    const cat = (storeSettings.dealItem3Link || 'accessories').trim().toLowerCase();
-                    if (cat) {
-                      setSelectedCategory(cat);
-                      setCurrentPage('category');
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                  }}
-                  className="flex flex-col group cursor-pointer"
-                >
-                  <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
-                    <img
-                      src={storeSettings.dealItem3Image || dealHeadphones}
-                      alt={storeSettings.dealItem3Title || 'Headphones'}
-                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    {(storeSettings.dealItem3Badge !== undefined ? storeSettings.dealItem3Badge : 'Up to 60% Off') && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
-                        {storeSettings.dealItem3Badge !== undefined ? storeSettings.dealItem3Badge : 'Up to 60% Off'}
-                      </div>
-                    )}
-                  </div>
-                  <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
-                    {storeSettings.dealItem3Title !== undefined ? storeSettings.dealItem3Title : 'Headphones'}
-                  </span>
-                </div>
-
-                {/* Item 4 */}
-                <div
-                  onClick={() => {
-                    const cat = (storeSettings.dealItem4Link || 'toys').trim().toLowerCase();
-                    if (cat) {
-                      setSelectedCategory(cat);
-                      setCurrentPage('category');
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                  }}
-                  className="flex flex-col group cursor-pointer"
-                >
-                  <div className="w-full aspect-square rounded-2xl bg-gray-50 flex items-center justify-center p-4 border border-gray-100 overflow-hidden relative">
-                    <img
-                      src={storeSettings.dealItem4Image || dealToyLaptop}
-                      alt={storeSettings.dealItem4Title || 'Kids Laptops and Tablets'}
-                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    {(storeSettings.dealItem4Badge !== undefined ? storeSettings.dealItem4Badge : 'Up to 70% Off') && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-[#9073fa] text-white py-1.5 text-center text-[10px] sm:text-xs font-black tracking-wide uppercase">
-                        {storeSettings.dealItem4Badge !== undefined ? storeSettings.dealItem4Badge : 'Up to 70% Off'}
-                      </div>
-                    )}
-                  </div>
-                  <span className="mt-3 text-xs sm:text-sm font-bold text-gray-855 text-center tracking-tight group-hover:text-primary transition-colors truncate">
-                    {storeSettings.dealItem4Title !== undefined ? storeSettings.dealItem4Title : 'Kids Laptops and Tablets'}
-                  </span>
-                </div>
-              </div>
-            </section>
-
-            {/* Single Collection Banner Section (800x1200 px responsive aspect ratio) */}
-            <section className="max-w-4xl mx-auto">
-              <div
-                onClick={() => {
-                  const cat = (storeSettings.singleBannerCategory || 'dresses').trim().toLowerCase();
-                  if (cat) {
-                    setSelectedCategory(cat);
-                    setCurrentPage('category');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }
-                }}
-                className="relative aspect-[2/3] sm:aspect-[3/2] w-full rounded-[32px] overflow-hidden border border-[#e8bcb7]/25 shadow-md group cursor-pointer"
-              >
-                <img
-                  src={storeSettings.singleBannerImage || singleCollectionBanner}
-                  alt={storeSettings.singleBannerTitle || 'Luxury Apparel'}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-102"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/60 via-black/30 to-transparent flex flex-col justify-end sm:justify-center p-8 sm:p-12 text-white">
-                  <div className="max-w-md space-y-3 sm:space-y-4">
-                    {(storeSettings.singleBannerSubtitle !== undefined ? storeSettings.singleBannerSubtitle : 'Exclusive Summer Collection') && (
-                      <span className="text-[10px] sm:text-xs uppercase font-extrabold tracking-widest text-[#fedbd6] bg-primary/20 px-3 py-1 rounded-full border border-primary/25 w-fit block">
-                        {storeSettings.singleBannerSubtitle !== undefined ? storeSettings.singleBannerSubtitle : 'Exclusive Summer Collection'}
-                      </span>
-                    )}
-                    {(storeSettings.singleBannerTitle !== undefined ? storeSettings.singleBannerTitle : 'Luxury Apparel') && (
-                      <h2 className="text-3xl sm:text-4xl font-display font-black tracking-tight leading-tight">
-                        {storeSettings.singleBannerTitle !== undefined ? storeSettings.singleBannerTitle : 'Luxury Apparel'}
-                      </h2>
-                    )}
-                    {(storeSettings.singleBannerCtaText !== undefined ? storeSettings.singleBannerCtaText : 'Shop Collection') && (
-                      <button
-                        type="button"
-                        className="bg-primary hover:bg-[#9a000e] text-white px-6 py-3 rounded-xl font-bold text-xs transition-all shadow-lg shadow-primary/25 cursor-pointer w-fit flex items-center gap-2"
-                      >
-                        {storeSettings.singleBannerCtaText !== undefined ? storeSettings.singleBannerCtaText : 'Shop Collection'}
-                        <ArrowRight size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
-            {/* Email Inner circle newsletter signup */}
-            <section className="py-16 px-6 bg-[#fedbd6] rounded-[40px] border border-[#e8bcb7]/25 text-center max-w-4xl mx-auto space-y-6 shadow-sm">
-              <div className="max-w-2xl mx-auto space-y-3">
-                <h2 className="font-display font-bold text-3xl text-[#291715]">
-                  Join the Inner Circle
-                </h2>
-                <p className="font-sans text-xs md:text-sm text-[#5e3f3b] leading-relaxed">
-                  Receive early access to collections, exclusive offers, and premium lifestyle inspiration curated for you.
-                </p>
-              </div>
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email address"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  className="flex-grow bg-white px-5 py-3.5 text-xs rounded-xl outline-none focus:ring-1 focus:ring-primary border border-[#e8bcb7]/15 text-[#291715]"
-                />
-                <button
-                  type="submit"
-                  className="bg-primary hover:bg-[#9a000e] text-white px-6 py-3.5 rounded-xl font-bold text-xs transition-colors shadow shadow-primary/10 cursor-pointer"
-                >
-                  Subscribe
-                </button>
-              </form>
-            </section>
-          </div>
-        )}
-
-        {/* Categories Screen / Catalogue Browser */}
-        {currentPage === 'category' && (
-          <div className="space-y-8 min-h-[60vh]">
-            <div className="border-b border-[#e8bcb7]/20 pb-6">
-              <h1 className="font-display font-bold text-3xl text-[#291715]">Catalogue Browser</h1>
-              <p className="text-xs text-[#5e3f3b] mt-1.5">Browse curated premium design pieces across our niche categories.</p>
-            </div>
-
-            {/* Sorting and Category Selector Row */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex overflow-x-auto hide-scrollbar gap-2 py-1">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-4.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap capitalize ${
-                      selectedCategory === cat.id
-                        ? 'bg-primary text-white shadow shadow-primary/20'
-                        : 'bg-white border border-[#e8bcb7]/20 text-[#5e3f3b] hover:border-primary'
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
-
-              {/* Dropdown sort selector */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-[#5e3f3b] font-semibold whitespace-nowrap">Sort by:</span>
-                <select
-                  value={categorySort}
-                  onChange={(e: any) => setCategorySort(e.target.value)}
-                  className="bg-white border border-[#e8bcb7]/20 text-xs rounded-xl py-2 px-3 text-[#291715] outline-none focus:ring-1 focus:ring-primary cursor-pointer font-semibold"
-                >
-                  <option value="default">Featured Recommendations</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Customer Rating</option>
-                </select>
-              </div>
-            </div>
-
-            {/* List products grid */}
-            {sortedCategoryProducts.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                {sortedCategoryProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onProductClick={(id) => {
-                      setSelectedProductId(id);
-                      setCurrentPage('product-detail');
-                    }}
-                    onAddToCart={(p, color, price, e) => {
-                      e.stopPropagation();
-                      handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
-                    }}
-                    isWishlisted={isWishlisted(product.id)}
-                    onToggleWishlist={(p, e) => {
-                      e.stopPropagation();
-                      handleToggleWishlist(p);
-                    }}
-                    isFiveMinActive={isFiveMinActive}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20 bg-white rounded-[32px] border border-[#e8bcb7]/15">
-                <p className="text-sm font-semibold text-[#5e3f3b]/70">No products found for this selection.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Detailed Product Screen */}
-        {currentPage === 'product-detail' && currentSelectedProduct && (
-          <ProductDetail
-            product={currentSelectedProduct}
-            relatedProducts={relatedProducts}
-            onSelectRelatedProduct={(id) => {
-              setSelectedProductId(id);
-              setCurrentPage('product-detail');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onBack={() => {
-              setSelectedProductId(null);
-              // Back to appropriate page
-              setCurrentPage('home');
-            }}
-            onAddToCart={(p, q, c, s, price, img) => handleAddToCart(p, q, c || 'Classic', s || 'Standard', price, img)}
-            onBuyNow={(p, q, c, s, price, img) => handleBuyNow(p, q, c || 'Classic', s || 'Standard', price, img)}
-            isWishlisted={isWishlisted(currentSelectedProduct.id)}
-            onToggleWishlist={handleToggleWishlist}
-            isFiveMinActive={isFiveMinActive}
-          />
-        )}
-
-        {/* Wishlist Screen */}
-        {currentPage === 'wishlist' && !user && (
-          <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
-        )}
-        {currentPage === 'wishlist' && user && (
-          <div className="space-y-8 min-h-[60vh]">
-            <div className="border-b border-[#e8bcb7]/20 pb-6">
-              <h1 className="font-display font-bold text-3xl text-[#291715]">My Wishlist</h1>
-              <p className="text-xs text-[#5e3f3b] mt-1.5">Premium products you bookmarked for later consideration.</p>
-            </div>
-
-            {wishlist.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                {wishlist.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onProductClick={(id) => {
-                      setSelectedProductId(id);
-                      setCurrentPage('product-detail');
-                    }}
-                    onAddToCart={(p, color, price, e) => {
-                      e.stopPropagation();
-                      handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
-                    }}
-                    isWishlisted={true}
-                    onToggleWishlist={(p, e) => {
-                      e.stopPropagation();
-                      handleToggleWishlist(p);
-                    }}
-                    isFiveMinActive={isFiveMinActive}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white rounded-[32px] border border-[#e8bcb7]/15">
-                <Heart size={44} className="text-[#e8bcb7] fill-none" />
-                <h3 className="font-semibold text-base text-[#291715]">Your wishlist is pristine</h3>
-                <p className="text-xs text-[#5e3f3b]/60 max-w-sm">
-                  Click the heart icons on any product grid or details page to accumulate items right here.
-                </p>
-                <button
-                  onClick={() => setCurrentPage('home')}
-                  className="bg-primary text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#9a000e] transition-colors cursor-pointer"
-                >
-                  Browse Home Items
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Special Offers Screen */}
-        {currentPage === 'offers' && (
-          <div className="space-y-8 min-h-[60vh]">
-            <div className="border-b border-[#e8bcb7]/20 pb-6">
-              <h1 className="font-display font-bold text-3xl text-[#291715]">Active Promotional Coupons</h1>
-              <p className="text-xs text-[#5e3f3b] mt-1.5">Apply coupon codes inside the basket drawer for instant markdowns.</p>
-            </div>
-
-            {activeCoupons.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {activeCoupons.map((offer) => (
-                  <div
-                    key={offer.code}
-                    className="p-6 bg-white border border-[#e8bcb7]/20 rounded-3xl shadow-sm space-y-4 hover:border-primary transition-colors flex flex-col justify-between"
-                  >
-                    <div className="space-y-2">
-                      <span className="text-xs font-bold bg-[#ff6b6b]/15 text-[#bb0012] px-3.5 py-1 rounded-full uppercase tracking-wider block w-fit font-sans">
-                        {offer.type === 'flat' ? `₹${offer.value} OFF` : `${offer.value}% OFF`}
-                      </span>
-                      <h3 className="font-display font-bold text-lg text-[#291715]">Code: {offer.code}</h3>
-                      <p className="text-xs text-[#5e3f3b] leading-relaxed">
-                        {offer.type === 'flat'
-                          ? `Get flat ₹${offer.value.toLocaleString()} off your order.`
-                          : `Get ${offer.value}% off your order.`}
-                      </p>
-                      {offer.minOrderValue > 0 && (
-                        <p className="text-[10px] text-primary font-bold font-mono">
-                          *Minimum order value: ₹{offer.minOrderValue.toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-
                     <button
-                      onClick={() => handleCopyCoupon(offer.code)}
-                      className="w-full bg-[#fff0ee] hover:bg-primary text-primary hover:text-white py-3 rounded-xl font-bold text-xs transition-all active:scale-95 cursor-pointer"
+                      type="submit"
+                      className="bg-primary hover:bg-[#9a000e] text-white px-6 py-3.5 rounded-xl font-bold text-xs transition-colors shadow shadow-primary/10 cursor-pointer"
                     >
-                      Copy Offer Code
+                      Subscribe
+                    </button>
+                  </form>
+                </section>
+              </div>
+            )}
+
+            {/* Categories Screen / Catalogue Browser */}
+            {currentPage === 'category' && (
+              <div className="space-y-8 min-h-[60vh]">
+                <div className="border-b border-[#e8bcb7]/20 pb-6">
+                  <h1 className="font-display font-bold text-3xl text-[#291715]">Catalogue Browser</h1>
+                  <p className="text-xs text-[#5e3f3b] mt-1.5">Browse curated premium design pieces across our niche categories.</p>
+                </div>
+
+                {/* Sorting and Category Selector Row */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex overflow-x-auto hide-scrollbar gap-2 py-1">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`px-4.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap capitalize ${selectedCategory === cat.id
+                            ? 'bg-primary text-white shadow shadow-primary/20'
+                            : 'bg-white border border-[#e8bcb7]/20 text-[#5e3f3b] hover:border-primary'
+                          }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Dropdown sort selector */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#5e3f3b] font-semibold whitespace-nowrap">Sort by:</span>
+                    <select
+                      value={categorySort}
+                      onChange={(e: any) => setCategorySort(e.target.value)}
+                      className="bg-white border border-[#e8bcb7]/20 text-xs rounded-xl py-2 px-3 text-[#291715] outline-none focus:ring-1 focus:ring-primary cursor-pointer font-semibold"
+                    >
+                      <option value="default">Featured Recommendations</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                      <option value="rating">Customer Rating</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* List products grid */}
+                {sortedCategoryProducts.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                    {sortedCategoryProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onProductClick={(id) => {
+                          setSelectedProductId(id);
+                          setCurrentPage('product-detail');
+                        }}
+                        onAddToCart={(p, color, price, e) => {
+                          e.stopPropagation();
+                          handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
+                        }}
+                        isWishlisted={isWishlisted(product.id)}
+                        onToggleWishlist={(p, e) => {
+                          e.stopPropagation();
+                          handleToggleWishlist(p);
+                        }}
+                        isFiveMinActive={isFiveMinActive}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-20 bg-white rounded-[32px] border border-[#e8bcb7]/15">
+                    <p className="text-sm font-semibold text-[#5e3f3b]/70">No products found for this selection.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Detailed Product Screen */}
+            {currentPage === 'product-detail' && currentSelectedProduct && (
+              <ProductDetail
+                product={currentSelectedProduct}
+                relatedProducts={relatedProducts}
+                onSelectRelatedProduct={(id) => {
+                  setSelectedProductId(id);
+                  setCurrentPage('product-detail');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onBack={() => {
+                  setSelectedProductId(null);
+                  // Back to appropriate page
+                  setCurrentPage('home');
+                }}
+                onAddToCart={(p, q, c, s, price, img) => handleAddToCart(p, q, c || 'Classic', s || 'Standard', price, img)}
+                onBuyNow={(p, q, c, s, price, img) => handleBuyNow(p, q, c || 'Classic', s || 'Standard', price, img)}
+                isWishlisted={isWishlisted(currentSelectedProduct.id)}
+                onToggleWishlist={handleToggleWishlist}
+                isFiveMinActive={isFiveMinActive}
+              />
+            )}
+
+            {/* Wishlist Screen */}
+            {currentPage === 'wishlist' && !user && (
+              <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
+            )}
+            {currentPage === 'wishlist' && user && (
+              <div className="space-y-8 min-h-[60vh]">
+                <div className="border-b border-[#e8bcb7]/20 pb-6">
+                  <h1 className="font-display font-bold text-3xl text-[#291715]">My Wishlist</h1>
+                  <p className="text-xs text-[#5e3f3b] mt-1.5">Premium products you bookmarked for later consideration.</p>
+                </div>
+
+                {wishlist.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                    {wishlist.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onProductClick={(id) => {
+                          setSelectedProductId(id);
+                          setCurrentPage('product-detail');
+                        }}
+                        onAddToCart={(p, color, price, e) => {
+                          e.stopPropagation();
+                          handleAddToCart(p, 1, color || 'Classic', 'Standard', price);
+                        }}
+                        isWishlisted={true}
+                        onToggleWishlist={(p, e) => {
+                          e.stopPropagation();
+                          handleToggleWishlist(p);
+                        }}
+                        isFiveMinActive={isFiveMinActive}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white rounded-[32px] border border-[#e8bcb7]/15">
+                    <Heart size={44} className="text-[#e8bcb7] fill-none" />
+                    <h3 className="font-semibold text-base text-[#291715]">Your wishlist is pristine</h3>
+                    <p className="text-xs text-[#5e3f3b]/60 max-w-sm">
+                      Click the heart icons on any product grid or details page to accumulate items right here.
+                    </p>
+                    <button
+                      onClick={() => setCurrentPage('home')}
+                      className="bg-primary text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-[#9a000e] transition-colors cursor-pointer"
+                    >
+                      Browse Home Items
                     </button>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16 bg-white rounded-[32px] border border-[#e8bcb7]/15">
-                <p className="text-sm font-semibold text-[#5e3f3b]/70">No active coupons right now â€” check back soon!</p>
+                )}
               </div>
             )}
 
-            {/* Deals Promotion Banner */}
-            <div className="p-8 bg-[#fff0ee] border border-[#e8bcb7]/25 rounded-[32px] flex flex-col md:flex-row items-center gap-6 justify-between">
-              <div>
-                <h3 className="font-display font-bold text-xl text-[#291715]">First order? Get FREE high-end delivery!</h3>
-                <p className="text-xs text-[#5e3f3b] mt-1">
-                  Automatic deduction on orders over ₹{storeSettings.freeDeliveryThreshold.toLocaleString()}.
-                </p>
+            {/* Special Offers Screen */}
+            {currentPage === 'offers' && (
+              <div className="space-y-8 min-h-[60vh]">
+                <div className="border-b border-[#e8bcb7]/20 pb-6">
+                  <h1 className="font-display font-bold text-3xl text-[#291715]">Active Promotional Coupons</h1>
+                  <p className="text-xs text-[#5e3f3b] mt-1.5">Apply coupon codes inside the basket drawer for instant markdowns.</p>
+                </div>
+
+                {activeCoupons.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {activeCoupons.map((offer) => (
+                      <div
+                        key={offer.code}
+                        className="p-6 bg-white border border-[#e8bcb7]/20 rounded-3xl shadow-sm space-y-4 hover:border-primary transition-colors flex flex-col justify-between"
+                      >
+                        <div className="space-y-2">
+                          <span className="text-xs font-bold bg-[#ff6b6b]/15 text-[#bb0012] px-3.5 py-1 rounded-full uppercase tracking-wider block w-fit font-sans">
+                            {offer.type === 'flat' ? `₹${offer.value} OFF` : `${offer.value}% OFF`}
+                          </span>
+                          <h3 className="font-display font-bold text-lg text-[#291715]">Code: {offer.code}</h3>
+                          <p className="text-xs text-[#5e3f3b] leading-relaxed">
+                            {offer.type === 'flat'
+                              ? `Get flat ₹${offer.value.toLocaleString()} off your order.`
+                              : `Get ${offer.value}% off your order.`}
+                          </p>
+                          {offer.minOrderValue > 0 && (
+                            <p className="text-[10px] text-primary font-bold font-mono">
+                              *Minimum order value: ₹{offer.minOrderValue.toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => handleCopyCoupon(offer.code)}
+                          className="w-full bg-[#fff0ee] hover:bg-primary text-primary hover:text-white py-3 rounded-xl font-bold text-xs transition-all active:scale-95 cursor-pointer"
+                        >
+                          Copy Offer Code
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-16 bg-white rounded-[32px] border border-[#e8bcb7]/15">
+                    <p className="text-sm font-semibold text-[#5e3f3b]/70">No active coupons right now â€” check back soon!</p>
+                  </div>
+                )}
+
+                {/* Deals Promotion Banner */}
+                <div className="p-8 bg-[#fff0ee] border border-[#e8bcb7]/25 rounded-[32px] flex flex-col md:flex-row items-center gap-6 justify-between">
+                  <div>
+                    <h3 className="font-display font-bold text-xl text-[#291715]">First order? Get FREE high-end delivery!</h3>
+                    <p className="text-xs text-[#5e3f3b] mt-1">
+                      Automatic deduction on orders over ₹{storeSettings.freeDeliveryThreshold.toLocaleString()}.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage('home')}
+                    className="bg-primary text-white py-3 px-6 rounded-xl font-bold text-xs shadow cursor-pointer active:scale-95"
+                  >
+                    Go Shop Now
+                  </button>
+                </div>
               </div>
-              <button 
-                onClick={() => setCurrentPage('home')}
-                className="bg-primary text-white py-3 px-6 rounded-xl font-bold text-xs shadow cursor-pointer active:scale-95"
-              >
-                Go Shop Now
-              </button>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Checkout Screen */}
-        {currentPage === 'checkout' && !user && (
-          <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
-        )}
-        {currentPage === 'checkout' && user && (
-          <CheckoutPage
-            uid={user.uid}
-            cartItems={cartItems}
-            addresses={userDoc?.addresses || []}
-            deliveryCharge={storeSettings.deliveryCharge}
-            freeDeliveryThreshold={storeSettings.freeDeliveryThreshold}
-            onOrderPlaced={handleOrderPlaced}
-            onBack={() => setCurrentPage('home')}
-            onToast={triggerToast}
-            onUpdateQuantity={handleUpdateCartQuantity}
-            onRemoveItem={handleRemoveCartItem}
-            isFiveMinActive={isFiveMinActive}
-            fiveMinMinOrderValue={storeSettings.fiveMinMinOrderValue}
-          />
-        )}
+            {/* Checkout Screen */}
+            {currentPage === 'checkout' && !user && (
+              <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
+            )}
+            {currentPage === 'checkout' && user && (
+              <CheckoutPage
+                uid={user.uid}
+                cartItems={cartItems}
+                addresses={userDoc?.addresses || []}
+                deliveryCharge={storeSettings.deliveryCharge}
+                freeDeliveryThreshold={storeSettings.freeDeliveryThreshold}
+                onOrderPlaced={handleOrderPlaced}
+                onBack={() => setCurrentPage('home')}
+                onToast={triggerToast}
+                onUpdateQuantity={handleUpdateCartQuantity}
+                onRemoveItem={handleRemoveCartItem}
+                isFiveMinActive={isFiveMinActive}
+                fiveMinMinOrderValue={storeSettings.fiveMinMinOrderValue}
+              />
+            )}
 
-        {/* Real Order Success Screen */}
-        {currentPage === 'checkout-success' && lastOrderId && (
-          <OrderSuccessPage
-            orderId={lastOrderId}
-            onContinueShopping={() => {
-              setCurrentPage('home');
-              setSelectedCategory('all');
-            }}
-            onViewOrder={() => {
-              setSelectedOrderId(lastOrderId);
-              setCurrentPage('order-details');
-            }}
-          />
-        )}
+            {/* Real Order Success Screen */}
+            {currentPage === 'checkout-success' && lastOrderId && (
+              <OrderSuccessPage
+                orderId={lastOrderId}
+                onContinueShopping={() => {
+                  setCurrentPage('home');
+                  setSelectedCategory('all');
+                }}
+                onViewOrder={() => {
+                  setSelectedOrderId(lastOrderId);
+                  setCurrentPage('order-details');
+                }}
+              />
+            )}
 
-        {/* My Orders Screen */}
-        {currentPage === 'my-orders' && !user && (
-          <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
-        )}
-        {currentPage === 'my-orders' && user && (
-          <OrderHistoryPage
-            uid={user.uid}
-            onSelectOrder={(orderId) => {
-              setSelectedOrderId(orderId);
-              setCurrentPage('order-details');
-            }}
-            onBrowse={() => setCurrentPage('home')}
-          />
-        )}
+            {/* My Orders Screen */}
+            {currentPage === 'my-orders' && !user && (
+              <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
+            )}
+            {currentPage === 'my-orders' && user && (
+              <OrderHistoryPage
+                uid={user.uid}
+                onSelectOrder={(orderId) => {
+                  setSelectedOrderId(orderId);
+                  setCurrentPage('order-details');
+                }}
+                onBrowse={() => setCurrentPage('home')}
+              />
+            )}
 
-        {/* Order Details Screen */}
-        {currentPage === 'order-details' && !user && (
-          <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
-        )}
-        {currentPage === 'order-details' && user && selectedOrderId && (
-          <OrderDetailsPage orderId={selectedOrderId} onBack={() => setCurrentPage('my-orders')} />
-        )}
+            {/* Order Details Screen */}
+            {currentPage === 'order-details' && !user && (
+              <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
+            )}
+            {currentPage === 'order-details' && user && selectedOrderId && (
+              <OrderDetailsPage orderId={selectedOrderId} onBack={() => setCurrentPage('my-orders')} />
+            )}
 
-        {/* Addresses Screen */}
-        {currentPage === 'addresses' && !user && (
-          <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
-        )}
-        {currentPage === 'addresses' && user && (
-          <div className="space-y-8 min-h-[60vh]">
-            <div className="border-b border-[#e8bcb7]/20 pb-6">
-              <h1 className="font-display font-bold text-3xl text-[#291715]">My Addresses</h1>
-              <p className="text-xs text-[#5e3f3b] mt-1.5">Manage your saved delivery addresses.</p>
-            </div>
-            <AddressBook uid={user.uid} addresses={userDoc?.addresses || []} onToast={triggerToast} />
-          </div>
-        )}
-        {currentPage === 'privacy-policy' && <PrivacyPolicyPage />}
-        {currentPage === 'terms-conditions' && <TermsConditionsPage />}
-        {currentPage === 'refund-return-policy' && <RefundReturnPolicyPage />}
-        {currentPage === 'shipping-policy' && <ShippingPolicyPage />}
-        {currentPage === 'cancellation-policy' && <CancellationPolicyPage />}
-        {currentPage === 'contact' && <ContactPage />}
-        </>
+            {/* Addresses Screen */}
+            {currentPage === 'addresses' && !user && (
+              <SignInGate onSignIn={signInWithGoogle} onBack={() => setCurrentPage('home')} />
+            )}
+            {currentPage === 'addresses' && user && (
+              <div className="space-y-8 min-h-[60vh]">
+                <div className="border-b border-[#e8bcb7]/20 pb-6">
+                  <h1 className="font-display font-bold text-3xl text-[#291715]">My Addresses</h1>
+                  <p className="text-xs text-[#5e3f3b] mt-1.5">Manage your saved delivery addresses.</p>
+                </div>
+                <AddressBook uid={user.uid} addresses={userDoc?.addresses || []} onToast={triggerToast} />
+              </div>
+            )}
+            {currentPage === 'privacy-policy' && <PrivacyPolicyPage />}
+            {currentPage === 'terms-conditions' && <TermsConditionsPage />}
+            {currentPage === 'refund-return-policy' && <RefundReturnPolicyPage />}
+            {currentPage === 'shipping-policy' && <ShippingPolicyPage />}
+            {currentPage === 'cancellation-policy' && <CancellationPolicyPage />}
+            {currentPage === 'contact' && <ContactPage />}
+          </>
         )}
       </main>
 
@@ -1340,9 +1319,8 @@ export default function App() {
             setCurrentPage('home');
             setSelectedProductId(null);
           }}
-          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${
-            currentPage === 'home' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
-          }`}
+          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${currentPage === 'home' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
+            }`}
         >
           <HomeIcon size={22} />
           <span className="text-[11px] font-bold mt-1">Home</span>
@@ -1353,9 +1331,8 @@ export default function App() {
             setSelectedCategory('all');
             setCurrentPage('category');
           }}
-          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${
-            currentPage === 'category' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
-          }`}
+          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${currentPage === 'category' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
+            }`}
         >
           <GridIcon size={22} />
           <span className="text-[11px] font-bold mt-1">Browse</span>
@@ -1378,9 +1355,8 @@ export default function App() {
 
         <button
           onClick={() => requireAuth('wishlist')}
-          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${
-            currentPage === 'wishlist' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
-          }`}
+          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${currentPage === 'wishlist' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
+            }`}
         >
           <Heart size={22} />
           <span className="text-[11px] font-bold mt-1">Wishlist</span>
@@ -1388,9 +1364,8 @@ export default function App() {
 
         <button
           onClick={() => requireAuth('my-orders')}
-          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${
-            currentPage === 'my-orders' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
-          }`}
+          className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 ${currentPage === 'my-orders' ? 'text-primary font-bold scale-105' : 'text-[#5e3f3b]/70 hover:text-primary'
+            }`}
         >
           <Package size={22} />
           <span className="text-[11px] font-bold mt-1">Orders</span>

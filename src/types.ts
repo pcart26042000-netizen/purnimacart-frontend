@@ -15,6 +15,7 @@ export interface Product {
   features?: string[];
   returnWindow?: string;
   isFiveMinBadge?: boolean;
+  isFashionFit?: boolean;
   variants?: { color?: string; image?: string; price?: number; stock?: number }[];
   hasSizes?: boolean;
   sizes?: { size: string; stock: number }[];
@@ -58,8 +59,7 @@ export type AdminSection =
   | 'customers'
   | 'coupons'
   | 'banners'
-  | 'settings'
-  | 'brand-deals';
+  | 'settings';
 
 export interface Category {
   id: string;

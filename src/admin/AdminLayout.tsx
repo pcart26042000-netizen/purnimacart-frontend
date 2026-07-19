@@ -14,7 +14,6 @@ import {
   Bell,
   CheckCircle2,
   Info,
-  Sparkles,
 } from 'lucide-react';
 import { AdminSection } from '../types';
 
@@ -26,7 +25,6 @@ const NAV_ITEMS: { id: AdminSection; label: string; icon: React.ElementType }[] 
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'coupons', label: 'Coupons', icon: Ticket },
   { id: 'banners', label: 'Banner Manager', icon: ImageIcon },
-  { id: 'brand-deals', label: 'Brand Deals', icon: Sparkles },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -63,11 +61,10 @@ export default function AdminLayout({ activeSection, onSectionChange, onExitAdmi
                 onSectionChange(item.id);
                 setMobileNavOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                active
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${active
                   ? 'bg-primary text-white shadow-lg shadow-primary/20'
                   : 'text-white/65 hover:bg-white/10 hover:text-white'
-              }`}
+                }`}
             >
               <Icon size={17} className="shrink-0" />
               <span className="truncate">{item.label}</span>

@@ -36,6 +36,7 @@ export function productFromFirestore(fp: FirestoreProduct): Product {
     features: [],
     returnWindow: fp.returnWindow,
     isFiveMinBadge: !!fp.isFiveMinBadge,
+    isFashionFit: !!fp.isFashionFit,
     variants: fp.variants || [],
     hasSizes: !!fp.hasSizes,
     sizes: fp.sizes || [],

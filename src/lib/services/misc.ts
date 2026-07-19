@@ -3,7 +3,7 @@ import {
   query, where, orderBy, serverTimestamp, Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import type { FirestoreBanner, FirestoreCoupon, StoreSettings, FirestoreBrandDeal } from '../../types/firestore';
+import type { FirestoreBanner, FirestoreCoupon, StoreSettings } from '../../types/firestore';
 
 // ---------- Banners ----------
 const BANNERS_COL = 'banners';
@@ -184,59 +184,6 @@ export async function getStoreSettings(): Promise<StoreSettings> {
 
 export async function updateStoreSettings(data: Partial<StoreSettings>) {
   await setDoc(doc(db, SETTINGS_DOC), data, { merge: true });
-}
-
-// ---------- Brand Deals ----------
-const BRAND_DEALS_COL = 'brandDeals';
-
-export interface BrandDealInput {
-  imageUrl: string;
-  brandLogoUrl?: string;
-  title: string;
-  brandName: string;
-  discountText: string;
-  link: string;
-  order: number;
-  isActive: boolean;
-}
-
-export async function getActiveBrandDeals(): Promise<FirestoreBrandDeal[]> {
-  const q = query(collection(db, BRAND_DEALS_COL), where('isActive', '==', true));
-  const snap = await getDocs(q);
-  const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as FirestoreBrandDeal));
-  items.sort((a, b) => (a.order || 0) - (b.order || 0));
-  return items;
-}
-
-export function subscribeBrandDealsAdmin(
-  onData: (deals: FirestoreBrandDeal[]) => void,
-  onError?: (error: Error) => void
-) {
-  const q = query(collection(db, BRAND_DEALS_COL), orderBy('order', 'asc'));
-  return onSnapshot(
-    q,
-    (snap) => onData(snap.docs.map(d => ({ id: d.id, ...d.data() } as FirestoreBrandDeal))),
-    (error) => {
-      console.error('subscribeBrandDealsAdmin: listener failed', error);
-      onError?.(error as unknown as Error);
-    }
-  );
-}
-
-export async function createBrandDeal(input: BrandDealInput) {
-  const ref = await addDoc(collection(db, BRAND_DEALS_COL), {
-    ...input,
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
-}
-
-export async function updateBrandDeal(id: string, input: Partial<BrandDealInput>) {
-  await updateDoc(doc(db, BRAND_DEALS_COL, id), input);
-}
-
-export async function deleteBrandDeal(id: string) {
-  await deleteDoc(doc(db, BRAND_DEALS_COL, id));
 }
 
 
